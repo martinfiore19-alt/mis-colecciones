@@ -3,39 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cobranzas - Recibos Acumulativos</title>
+    <title>Cobranzas - Recibos Ilimitados</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 900px; margin: auto; }
-        .header { background: white; padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .upload-btn { background: #2563eb; color: white; padding: 15px 30px; border-radius: 10px; cursor: pointer; display: inline-block; font-weight: bold; }
+        :root { --primary: #2563eb; --whatsapp: #22c35e; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
-        
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 6px solid #2563eb; }
-        .client-name { font-weight: bold; font-size: 1.2rem; color: #1e293b; }
-        
-        .debt-box { margin: 15px 0; padding: 10px; background: #fff1f0; border-radius: 8px; }
-        .debt-label { font-size: 0.8rem; color: #cf1322; font-weight: bold; }
-        .debt-total { font-size: 1.8rem; font-weight: bold; color: #cf1322; }
+        .header { 
+            background: white; padding: 25px; border-radius: 15px; 
+            text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; 
+        }
+        .upload-label { 
+            background: var(--primary); color: white; padding: 12px 24px; 
+            border-radius: 8px; cursor: pointer; display: inline-block; font-weight: bold;
+        }
 
-        .recibos-list { font-size: 0.85rem; color: #64748b; margin-bottom: 10px; border-top: 1px solid #eee; padding-top: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
         
-        .btn { width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; margin-top: 8px; text-decoration: none; display: block; text-align: center; box-sizing: border-box; }
-        .btn-add { background: #e2e8f0; color: #1e293b; }
-        .btn-ws { background: #25d366; color: white; font-size: 1rem; }
+        .card { 
+            background: white; padding: 20px; border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 6px solid var(--primary);
+            display: flex; flex-direction: column;
+        }
         
-        .badge-pago { color: #059669; font-weight: bold; }
+        .client-name { font-weight: bold; font-size: 1.1rem; color: #1e293b; margin-bottom: 5px; height: 2.4em; overflow: hidden; }
+        
+        .debt-box { background: #fef2f2; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 10px; }
+        .debt-label { font-size: 0.75rem; color: #b91c1c; font-weight: bold; text-transform: uppercase; }
+        .debt-total { font-size: 1.8rem; font-weight: bold; color: #b91c1c; }
+
+        /* Lista de recibos con scroll para que no haya límite visual */
+        .recibos-container { 
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;
+            padding: 10px; margin-bottom: 10px; max-height: 120px; overflow-y: auto;
+        }
+        .recibo-item { 
+            display: flex; justify-content: space-between; font-size: 0.85rem; 
+            padding: 4px 0; border-bottom: 1px solid #edf2f7; 
+        }
+        .recibo-item:last-child { border-bottom: none; }
+
+        .btn { 
+            width: 100%; padding: 12px; border: none; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; margin-top: 8px; 
+            text-decoration: none; display: block; text-align: center; box-sizing: border-box;
+        }
+        .btn-add { background: #334155; color: white; }
+        .btn-ws { background: var(--whatsapp); color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>📲 Gestión de Cobranzas</h1>
-        <p>Cargá múltiples recibos por cliente y enviá el saldo actualizado.</p>
-        <label for="upload" class="upload-btn">📁 CARGAR EXCEL</label>
+        <h1>📊 Sistema de Cobranzas</h1>
+        <p>Cargá todos los recibos que necesites sin límites.</p>
+        <label for="upload" class="upload-label">📁 CARGAR EXCEL</label>
         <input type="file" id="upload" accept=".xlsx, .xls" style="display:none">
     </div>
 
@@ -58,15 +82,12 @@
             clientesData = {};
             for (let i = 1; i < rows.length; i++) {
                 const r = rows[i];
-                const nombre = r[0];
-                const saldoExcel = parseFloat(r[6]) || 0;
+                const nombre = r[0]; // Columna A
+                const saldoExcel = parseFloat(r[6]) || 0; // Columna G
 
                 if (nombre && saldoExcel > 0) {
                     if (!clientesData[nombre]) {
-                        clientesData[nombre] = { 
-                            deudaOriginal: 0, 
-                            historialRecibos: [] 
-                        };
+                        clientesData[nombre] = { deudaOriginal: 0, pagos: [] };
                     }
                     clientesData[nombre].deudaOriginal += saldoExcel;
                 }
@@ -76,15 +97,13 @@
         reader.readAsArrayBuffer(file);
     });
 
-    function agregarRecibo(nombre) {
-        const monto = prompt(`Ingrese el monto del nuevo recibo para ${nombre}:`);
+    function agregarPago(nombre) {
+        const monto = prompt(`Monto del nuevo recibo para: ${nombre}`);
         const valor = parseFloat(monto);
         
         if (!isNaN(valor) && valor > 0) {
-            clientesData[nombre].historialRecibos.push(valor);
+            clientesData[nombre].pagos.push(valor);
             render();
-        } else if (monto !== null) {
-            alert("Por favor, ingrese un número válido.");
         }
     }
 
@@ -94,44 +113,45 @@
         
         Object.keys(clientesData).sort().forEach(nom => {
             const info = clientesData[nom];
-            
-            // Sumar todos los recibos cargados
-            const totalPagado = info.historialRecibos.reduce((a, b) => a + b, 0);
-            const saldoFinal = info.deudaOriginal - totalPagado;
+            const sumaPagos = info.pagos.reduce((a, b) => a + b, 0);
+            const saldoFinal = info.deudaOriginal - sumaPagos;
 
-            // Preparar mensaje de WhatsApp
-            let msj = `*ESTADO DE CUENTA ACTUALIZADO*\n`;
+            // Mensaje WhatsApp
+            let msj = `*RESUMEN DE CUENTA*\n`;
             msj += `👤 *Cliente:* ${nom}\n`;
             msj += `──────────────────\n`;
-            msj += `📉 Saldo inicial: $${info.deudaOriginal.toLocaleString()}\n`;
+            msj += `📉 Saldo Excel: $${info.deudaOriginal.toLocaleString()}\n`;
             
-            if (info.historialRecibos.length > 0) {
-                msj += `✅ Pagos recibidos (${info.historialRecibos.length}): -$${totalPagado.toLocaleString()}\n`;
+            if (info.pagos.length > 0) {
+                msj += `✅ Pagos recibidos: -$${sumaPagos.toLocaleString()}\n`;
+                msj += `📊 Cantidad de recibos: ${info.pagos.length}\n`;
             }
             
             msj += `──────────────────\n`;
-            msj += `💰 *TOTAL A PAGAR: $${saldoFinal.toLocaleString()}*`;
+            msj += `💰 *SALDO PENDIENTE: $${saldoFinal.toLocaleString()}*`;
 
             const urlWS = `https://wa.me/?text=${encodeURIComponent(msj)}`;
 
-            contenedor.innerHTML += `
-                <div class="card">
-                    <div class="client-name">${nom}</div>
-                    
-                    <div class="debt-box">
-                        <div class="debt-label">SALDO PENDIENTE</div>
-                        <div class="debt-total">$${saldoFinal.toLocaleString()}</div>
-                    </div>
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="client-name">${nom}</div>
+                
+                <div class="debt-box">
+                    <div class="debt-label">TOTAL A PAGAR</div>
+                    <div class="debt-total">$${saldoFinal.toLocaleString()}</div>
+                </div>
 
-                    <div class="recibos-list">
-                        ${info.historialRecibos.length > 0 
-                            ? `<strong>Pagos cargados:</strong><br>` + info.historialRecibos.map((m, idx) => `Pago ${idx+1}: <span class="badge-pago">$${m.toLocaleString()}</span>`).join('<br>')
-                            : '<i>Sin recibos cargados aún</i>'}
-                    </div>
+                <div class="recibos-container">
+                    ${info.pagos.length > 0 
+                        ? info.pagos.map((p, idx) => `<div class="recibo-item"><span>Recibo #${idx+1}</span> <b>$${p.toLocaleString()}</b></div>`).join('')
+                        : '<div style="text-align:center; color:#94a3b8; font-size:0.8rem;">Sin pagos cargados</div>'}
+                </div>
 
-                    <button class="btn btn-add" onclick="agregarRecibo('${nom}')">➕ Agregar Recibo</button>
-                    <a href="${urlWS}" target="_blank" class="btn btn-ws">📲 ENVIAR WHATSAPP</a>
-                </div>`;
+                <button class="btn btn-add" onclick="agregarPago('${nom}')">➕ Cargar Otro Recibo</button>
+                <a href="${urlWS}" target="_blank" class="btn btn-ws">📲 ENVIAR WHATSAPP</a>
+            `;
+            contenedor.appendChild(card);
         });
     }
 </script>
