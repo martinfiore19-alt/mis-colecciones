@@ -3,63 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>L.T.A. - EL ROJO EDITION</title>
+    <title>L.T.A. - MIS COLECCIONES</title>
     <style>
-        :root { 
-            --bg: #0a0a0a; --card: #161616; --text: #ffffff; 
-            --accent: #E53935; /* Rojo Independiente */
-            --whatsapp: #25d366; --gold: #FFD700; --blue: #1E88E5; 
-        }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; transition: 0.3s; }
+        :root { --bg: #000000; --card: #161616; --text: #ffffff; --accent: #E53935; --whatsapp: #25d366; --gold: #FFD700; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         
-        /* Splash y Login */
-        #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; transition: opacity 0.5s; }
-        .logo-img { width: 80%; max-width: 250px; border-radius: 50%; border: 3px solid var(--accent); box-shadow: 0 0 20px rgba(229, 57, 53, 0.4); }
+        #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; }
+        .logo-img { width: 80px; border-radius: 50%; border: 2px solid var(--accent); margin-bottom: 15px; }
 
+        #login-screen { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 99998; padding: 20px; text-align: center; }
+        
         #main-app { display: none; max-width: 500px; margin: auto; }
         
-        /* Botones y Cards */
-        .btn-tipo { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border: 1px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .btn-tipo:active { transform: scale(0.98); }
-        
+        .btn-tipo { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
         .album-card { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #222; cursor: pointer; position: relative; }
+        .photo-edit { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #333; background: #111; overflow: hidden; }
         
-        .photo-edit { width: 65px; height: 65px; object-fit: cover; border-radius: 10px; border: 2px solid #333; background: #111; overflow: hidden; position: relative; }
+        .prog-container { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 8px; overflow: hidden; }
+        .prog-fill { height: 100%; background: var(--accent); transition: width 0.5s; }
         
-        /* Sistema de Progresos */
-        .stats-box { background: #1a1a1a; padding: 15px; border-radius: 15px; margin-bottom: 20px; border-left: 5px solid var(--accent); }
-        .prog-container { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 8px; overflow: hidden; }
-        .prog-fill { height: 100%; background: var(--accent); transition: width 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
-
-        /* Grilla de Números Mejorada */
-        .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 15px; }
-        .nro { 
-            background: #1a1a1a; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
-            border-radius: 8px; color: #444; border: 1px solid #222; font-weight: bold; font-size: 14px; cursor: pointer; position: relative;
-        }
+        .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 15px; }
+        .nro { background: #1a1a1a; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #444; border: 1px solid #222; font-weight: bold; font-size: 12px; cursor: pointer; position: relative; }
         .nro.tengo { background: var(--accent); color: white; border-color: #ffcdd2; }
         .nro.repe { background: var(--gold); color: black; border-color: #fff; }
-        .nro.repe::after { content: '+1'; position: absolute; top: -5px; right: -5px; background: black; color: white; font-size: 9px; padding: 2px 4px; border-radius: 10px; border: 1px solid var(--gold); }
-        .nro.oculto { display: none; }
-
-        /* Inputs y Acciones */
-        input, select { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: white; border-radius: 12px; font-size: 16px; margin-bottom: 15px; }
-        .btn-accion { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(229, 57, 53, 0.3); }
-        .btn-share { background: var(--whatsapp); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-back { background: #222; color: #fff; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 15px; }
+        .nro.repe::after { content: '+1'; position: absolute; top: -3px; right: -3px; background: black; color: white; font-size: 8px; padding: 1px 3px; border-radius: 5px; }
         
-        .badge-info { font-size: 11px; padding: 4px 8px; border-radius: 20px; background: #333; color: #ccc; }
-        .delete-icon { position: absolute; top: 8px; right: 8px; color: #444; font-size: 18px; }
-        
-        #theme-toggle { position: absolute; top: 15px; right: 15px; background: transparent; border: 1px solid #333; color: white; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; }
+        input, select { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; font-size: 16px; }
+        .btn-accion { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-back { background: #222; color: #fff; border: none; padding: 8px 12px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; }
+        .delete-icon { position: absolute; top: 10px; right: 10px; color: #444; }
     </style>
 </head>
 <body>
 
     <div id="splash">
         <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" class="logo-img">
-        <h1 style="color:var(--accent); margin-top:20px; letter-spacing: 2px;">REY DE COPAS</h1>
-        <p style="color:#666; font-size: 12px;">TRACKER DE COLECCIONES</p>
+        <h2 style="color:var(--accent)">CARGANDO...</h2>
+    </div>
+
+    <div id="login-screen">
+        <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" class="logo-img">
+        <h3>¿CÓMO TE LLAMÁS?</h3>
+        <input type="text" id="user-input-name" style="text-transform: uppercase;" placeholder="TU NOMBRE AQUÍ...">
+        <button class="btn-accion" onclick="saveUserName()">EMPEZAR</button>
     </div>
 
     <div id="main-app"></div>
@@ -67,80 +53,78 @@
     <input type="file" id="photoInput" style="display:none" accept="image/*" onchange="handleFileSelect(event)">
 
     <script>
-        const DB_NAME = 'lta_diablo_v1';
+        const DB_NAME = 'lta_flexible_v2';
         const LOGO_URL = "https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png";
         
-        // --- CATÁLOGOS (Aquí van tus listas completas de antes) ---
-        const CATALOGO_CARTAS = [{n: "COPA MUNDIAL 2026 ADRENALYN", t: 630}, {n: "FIFA 365 2025", t: 450}, {n: "LIBERTADORES 2024", t: 383}].sort((a,b)=>a.n.localeCompare(b.n));
-        const CATALOGO_FIGUS = [{n: "FIFA 365 2026", t: 660}, {n: "QATAR 2022", t: 638}, {n: "FÚTBOL ARGENTINO 2024", t: 508}].sort((a,b)=>a.n.localeCompare(b.n));
+        // --- CATÁLOGOS ---
+        const RAW_CARTAS = [{ n: "Copa Mundial de la FIFA 2026 Adrenalyn XL", t: 630 }, { n: "FIFA 365: 2025-2026 Adrenalyn XL", t: 450 }, { n: "Copa Mundial de Clubes de la FIFA 2025. Adrenalyn XL", t: 387 }, { n: "FIFA 365 2024-2025 Adrenalyn XL", t: 441 }, { n: "Fútbol Argentino 2024 Adrenalyn XL", t: 538 }, { n: "FIFA 365 2023-2024 Adrenalyn XL", t: 441 }, { n: "Copa Mundial Femenina de la FIFA 2023. Adrenalyn XL", t: 375 }, { n: "Fútbol Argentino 2023. Adrenalyn XL", t: 536 }, { n: "FIFA 365: 2022-2023. Adrenalyn XL", t: 441 }, { n: "Clase Top 2021-2022. Adrenalyn XL", t: 438 }, { n: "Copa Mundial de la FIFA Qatar 2022. Adrenalyn XL", t: 495 }, { n: "Camino a la Copa Mundial de la FIFA Qatar 2022. Adrenalyn XL", t: 494 }, { n: "Fútbol Argentino 2021. Adrenalyn XL", t: 501 }, { n: "FIFA 365: 2020-2021. Adrenalyn XL", t: 398 }, { n: "Previa de la UEFA Euro 2020. Adrenalyn XL", t: 709 }, { n: "Fútbol Argentino 2020. Adrenalyn XL", t: 173 }, { n: "FIFA 365: 2019-2020. Adrenalyn XL", t: 550 }, { n: "FIFA 365: 2018-2019. Adrenalyn XL", t: 396 }, { n: "Copa Mundial de la FIFA Rusia 2018. Adrenalyn XL", t: 622 }, { n: "FIFA 365: 2017-2018. Adrenalyn XL", t: 573 }, { n: "Camino a la Copa Mundial de la FIFA Rusia 2018. Adrenalyn XL", t: 608 }, { n: "Fútbol Argentino 2017. Adrenalyn XL", t: 307 }, { n: "FIFA 365: 2016-2017. Adrenalyn XL", t: 703 }, { n: "Copa América Centenario. Estados Unidos 2016. Adrenalyn XL", t: 315 }, { n: "FIFA 365: 2015-2016. Adrenalyn XL", t: 491 }, { n: "Copa América. Chile 2015. Adrenalyn XL", t: 245 }, { n: "Copa Mundial de la FIFA Brasil 2014. Adrenalyn XL", t: 678 }, { n: "Liga de Campeones de la UEFA 2013-2014. Adrenalyn XL", t: 450 }, { n: "Camino a la Copa Mundial de la FIFA Brasil 2014. Adrenalyn XL", t: 278 }, { n: "Fútbol Argentino 2013. Adrenalyn XL", t: 350 }, { n: "Liga de Campeones de la UEFA 2012-2013. Adrenalyn XL", t: 555 }, { n: "Fútbol Argentino 2012. Adrenalyn XL", t: 350 }, { n: "Liga de Campeones de la UEFA 2011-2012. Adrenalyn XL", t: 412 }, { n: "Liga de Campeones de la UEFA 2010-2011. Adrenalyn XL", t: 500 }, { n: "Copa Mundial de la FIFA Sudáfrica 2010. Adrenalyn XL", t: 350 }, { n: "CONMEBOL: Libertadores y Sudamericana 2024. Adrenalyn XL", t: 383 }];
+        const RAW_FIGUS = [{ n: "Liga de Campeones de la UEFA 2025-2026", t: 574 }, { n: "FIFA 365 2026", t: 660 }, { n: "UEFA Euro 2024", t: 1428 }, { n: "Copa Mundial de Clubes de la FIFA 2025", t: 558 }, { n: "UEFA Euro Francia 2016", t: 680 }, { n: "Fútbol Argentino 2025", t: 567 }, { n: "Fútbol Argentino 2024", t: 508 }, { n: "Fútbol Argentino 2023", t: 522 }, { n: "Fútbol Argentino 2022", t: 519 }, { n: "Fútbol Argentino 2021", t: 481 }, { n: "Fútbol Argentino 2019-2020", t: 452 }, { n: "Fútbol Argentino 2018-2019", t: 392 }, { n: "Fútbol Argentino 2017-2018", t: 521 }, { n: "Fútbol Argentino 2016", t: 660 }, { n: "Fútbol Argentino 2015", t: 660 }, { n: "Fútbol Argentino 2014", t: 490 }, { n: "Fútbol Argentino 2013-2014", t: 504 }, { n: "Torneo Inicial Argentina 2012-2013", t: 440 }, { n: "Fútbol Argentino 2011", t: 450 }, { n: "Futbol Argentino Apertura 2010", t: 376 }, { n: "Futbol Argentino Apertura 2009", t: 563 }, { n: "Futbol Argentino Clausura 2008", t: 382 }, { n: "Futbol Argentino Apertura 2008", t: 640 }, { n: "Futbol Argentino Apertura 2006", t: 300 }, { n: "Copa Mundial de la FIFA Qatar 2022", t: 842 }, { n: "Copa Mundial de la FIFA Rusia 2018", t: 844 }, { n: "Copa Mundial de la FIFA Brasil 2014", t: 782 }, { n: "Copa Mundial FIFA Women's World Cup France 2019", t: 510 }, { n: "Copa Mundial FIFA World Cup South Africa 2010", t: 806 }, { n: "Copa Mundial FIFA World Cup Germany 2006", t: 605 }, { n: "Copa Mundial FIFA World Cup Korea/Japan 2002", t: 581 }, { n: "Copa Mundial FIFA World Cup France 1998", t: 561 }, { n: "Copa Mundial FIFA World Cup USA 1994", t: 444 }, { n: "Copa Mundial World Cup USA 1994 (Upper Deck)", t: 300 }, { n: "Copa Mundial FIFA World Cup Italia 1990", t: 448 }, { n: "Copa Mundial FIFA World Cup Mexico 1986", t: 427 }, { n: "Copa Mundial FIFA World Cup España 1982", t: 427 }, { n: "Copa Mundial FIFA World Cup Argentina 1978", t: 400 }, { n: "Copa Mundial FIFA World Cup München 1974", t: 400 }, { n: "Copa Mundial FIFA World Cup Mexico 1970", t: 288 }, { n: "Road to FIFA World Cup Qatar 2022", t: 600 }, { n: "Road to 2018 FIFA World Cup Russia", t: 480 }, { n: "Road to 2014 FIFA World Cup Brazil", t: 428 }, { n: "Road to the FIFA World Cup 2002", t: 150 }, { n: "World Cup Story", t: 262 }, { n: "CONMEBOL Copa América 2024", t: 494 }, { n: "CONMEBOL Copa América 2021", t: 369 }, { n: "CONMEBOL Copa América 2021 Preview", t: 400 }, { n: "CONMEBOL Copa América Brasil 2019", t: 400 }, { n: "CONMEBOL Copa América Centenario. USA 2016", t: 452 }, { n: "CONMEBOL Copa América. Chile 2015", t: 398 }, { n: "CONMEBOL Copa América. Argentina 2011", t: 371 }, { n: "CONMEBOL Copa América. Venezuela 2007", t: 300 }, { n: "CONMEBOL Copa América. Colombia 2001", t: 153 }];
+
+        const CATALOGO_CARTAS = RAW_CARTAS.map(i => ({n: i.n.toUpperCase(), t: i.t})).sort((a,b) => a.n.localeCompare(b.n));
+        const CATALOGO_FIGUS = RAW_FIGUS.map(i => ({n: i.n.toUpperCase(), t: i.t})).sort((a,b) => a.n.localeCompare(b.n));
 
         let db = JSON.parse(localStorage.getItem(DB_NAME)) || [];
-        let userName = localStorage.getItem('lta_user_name_v12') || "MARTÍN";
+        let userName = localStorage.getItem('lta_user_name') || "";
         let currentId = null;
-        let filtroFaltantes = false;
+        let tipoActual = "";
 
         window.onload = () => {
             setTimeout(() => {
-                document.getElementById('splash').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash').style.display = 'none';
+                document.getElementById('splash').style.display = 'none';
+                if (!userName) {
+                    document.getElementById('login-screen').style.display = 'flex';
+                } else {
                     showApp();
-                }, 500);
-            }, 1200);
+                }
+            }, 1000);
         };
 
-        function showApp() { 
-            document.getElementById('main-app').style.display = 'block'; 
-            renderInicio(); 
+        function saveUserName() {
+            const val = document.getElementById('user-input-name').value.trim().toUpperCase();
+            if (val.length < 2) return alert("PONÉ UN NOMBRE VÁLIDO");
+            userName = val;
+            localStorage.setItem('lta_user_name', userName);
+            document.getElementById('login-screen').style.display = 'none';
+            showApp();
         }
+
+        function showApp() { document.getElementById('main-app').style.display = 'block'; renderInicio(); }
 
         function renderInicio() {
-            let totalTengo = 0;
-            db.forEach(a => totalTengo += a.tengo.length);
-
             document.getElementById('main-app').innerHTML = `
                 <div style="text-align:center; padding: 20px 0;">
-                    <img src="${LOGO_URL}" style="width:80px; border-radius:50%; border:2px solid var(--accent);">
-                    <h2 style="margin:10px 0 5px 0;">¡HOLA, ${userName}!</h2>
-                    <span class="badge-info">TOTAL COLECCIONADO: ${totalTengo}</span>
+                    <img src="${LOGO_URL}" style="width:70px; border-radius:50%; border:2px solid var(--accent);">
+                    <h2>¡HOLA, ${userName}!</h2>
+                    <small style="color:#555" onclick="resetUser()">CAMBIAR NOMBRE</small>
                 </div>
-                
-                <div class="stats-box">
-                    <strong>ESTADO GLOBAL</strong>
-                    <p style="font-size:12px; color:#aaa; margin:5px 0;">Tenés ${db.length} álbumes activos en tu estante virtual.</p>
-                </div>
-
                 <div class="btn-tipo" onclick="setTipo('Carta')">🃏 MIS CARTAS</div>
                 <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ MIS FIGURITAS</div>
-                
                 <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                    <button class="btn-back" style="width:48%; background:#333;" onclick="exportDB()">⬇ BACKUP</button>
-                    <button class="btn-back" style="width:48%; background:#333;" onclick="document.getElementById('importInput').click()">⬆ SUBIR</button>
+                    <button class="btn-back" style="width:48%;" onclick="exportDB()">⬇ BACKUP</button>
+                    <button class="btn-back" style="width:48%;" onclick="document.getElementById('importInput').click()">⬆ SUBIR</button>
                     <input type="file" id="importInput" style="display:none" onchange="importDB(event)">
-                </div>
-            `;
+                </div>`;
         }
+
+        function resetUser() { if(confirm("¿QUERÉS CAMBIAR TU NOMBRE?")) { localStorage.removeItem('lta_user_name'); location.reload(); } }
 
         function setTipo(t) { tipoActual = t; renderMenu(); }
 
         function renderMenu() {
             const filtrados = db.filter(a => a.tipo === tipoActual);
             let html = `<button class="btn-back" onclick="renderInicio()">⬅ VOLVER</button>
-                        <h3 style="margin-bottom:15px; color:var(--accent)">MIS ${tipoActual.toUpperCase()}S</h3>
-                        <button class="btn-accion" onclick="renderNuevoForm()">+ NUEVA COLECCIÓN</button><br><br>`;
-            
+                        <h3 style="color:var(--accent)">MIS ${tipoActual.toUpperCase()}S</h3>
+                        <button class="btn-accion" onclick="renderNuevoForm()">+ AGREGAR DESDE CATÁLOGO</button><br><br>`;
             filtrados.forEach(a => {
                 const porc = Math.floor((a.tengo.length / a.total) * 100);
-                const repes = a.repes ? a.repes.length : 0;
                 html += `
                     <div class="album-card" onclick="verAlbum('${a.id}')">
                         <div class="photo-edit" onclick="pedirFoto(event, '${a.id}')">
                             <img src="${a.img || LOGO_URL}" style="width:100%; height:100%; object-fit:cover;">
                         </div>
                         <div style="flex:1">
-                            <strong style="font-size:14px">${a.nombre}</strong><br>
-                            <small style="color:var(--accent); font-weight:bold;">${porc}% COMPLETADO</small>
-                            ${repes > 0 ? `<small style="color:var(--gold); margin-left:10px;">• ${repes} REPES</small>` : ''}
+                            <strong style="font-size:13px">${a.nombre}</strong><br>
+                            <small style="color:var(--accent)">${porc}% COMPLETADO</small>
                             <div class="prog-container"><div class="prog-fill" style="width:${porc}%"></div></div>
                         </div>
                         <div class="delete-icon" onclick="eliminarAlbum(event, '${a.id}')">✖</div>
@@ -149,151 +133,110 @@
             document.getElementById('main-app').innerHTML = html;
         }
 
-        function verAlbum(id) {
-            currentId = id;
-            const a = db.find(x => x.id === id);
-            if (!a.repes) a.repes = [];
-            filtroFaltantes = false;
+        function renderNuevoForm() {
+            document.getElementById('main-app').innerHTML = `
+                <button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
+                <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #333">
+                    <input type="text" id="search-cat" placeholder="🔎 BUSCAR..." onkeyup="filterSelect()">
+                    <select id="select-catalogo" size="8"></select>
+                    <hr style="border:0; border-top:1px solid #333; margin:15px 0">
+                    <input type="text" id="c-nombre" style="text-transform:uppercase" placeholder="NOMBRE MANUAL">
+                    <input type="number" id="c-total" placeholder="CANTIDAD">
+                    <button class="btn-accion" onclick="guardarColeccion()">GUARDAR</button>
+                </div>`;
+            filterSelect();
+        }
 
+        function filterSelect() {
+            const s = document.getElementById('search-cat').value.toUpperCase();
+            const sel = document.getElementById('select-catalogo');
+            const cat = tipoActual === 'Carta' ? CATALOGO_CARTAS : CATALOGO_FIGUS;
+            sel.innerHTML = cat.filter(i => i.n.includes(s))
+                .map((item, idx) => `<option value="${idx}">${item.n} (${item.t})</option>`).join('');
+            if (sel.options.length > 0) sel.selectedIndex = 0;
+        }
+
+        function guardarColeccion() {
+            const sel = document.getElementById('select-catalogo');
+            const manN = document.getElementById('c-nombre').value.toUpperCase();
+            const manT = parseInt(document.getElementById('c-total').value);
+            const cat = tipoActual === 'Carta' ? CATALOGO_CARTAS : CATALOGO_FIGUS;
+            let n, t;
+            if (manN && manT) { n = manN; t = manT; }
+            else if (sel.value !== "") {
+                const s = document.getElementById('search-cat').value.toUpperCase();
+                const item = cat.filter(i => i.n.includes(s))[sel.selectedIndex];
+                n = item.n; t = item.t;
+            } else return;
+            db.push({ id: 'a'+Date.now(), nombre: n, total: t, tipo: tipoActual, tengo: [], repes: [], img: "" });
+            localStorage.setItem(DB_NAME, JSON.stringify(db));
+            renderMenu();
+        }
+
+        function verAlbum(id) {
+            currentId = id; const a = db.find(x => x.id === id); if (!a.repes) a.repes = [];
             let html = `
                 <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10; border-bottom:1px solid #222">
                     <button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <img src="${a.img || LOGO_URL}" style="width:45px; height:45px; border-radius:8px; border:1px solid var(--accent);">
-                        <div style="flex:1">
-                            <h3 style="margin:0; font-size:14px; color:var(--accent)">${a.nombre}</h3>
-                            <small id="sub-stats">${a.tengo.length} de ${a.total} (${a.repes.length} repes)</small>
-                        </div>
-                        <button class="btn-back" style="margin:0; padding:5px 10px; font-size:10px;" onclick="toggleFiltro()">🔎 FALTANTES</button>
+                        <img src="${a.img || LOGO_URL}" style="width:40px; height:40px; border-radius:5px;" onclick="pedirFoto(event, '${a.id}')">
+                        <h3 style="margin:0; font-size:13px; flex:1;">${a.nombre}</h3>
                     </div>
-                    <button class="btn-share" onclick="compartirWhatsApp('${a.id}')">📲 ENVIAR LISTA DE CAMBIO</button>
                 </div>
-                <div class="grid" id="main-grid">`;
-
+                <div class="grid">`;
             for(let i=1; i<=a.total; i++) {
-                let clase = "";
-                if (a.repes.includes(i)) clase = "tengo repe";
-                else if (a.tengo.includes(i)) clase = "tengo";
-                
-                html += `<div class="nro ${clase}" id="n-${i}" onclick="cicloFigu('${id}', ${i})">${i}</div>`;
+                let cl = a.repes.includes(i) ? "tengo repe" : (a.tengo.includes(i) ? "tengo" : "");
+                html += `<div class="nro ${cl}" id="n-${i}" onclick="ciclo('${id}', ${i})">${i}</div>`;
             }
-            html += `</div>`;
+            html += `</div><button class="btn-accion" style="margin-top:20px; background:var(--whatsapp)" onclick="compartir('${id}')">📲 WHATSAPP</button>`;
             document.getElementById('main-app').innerHTML = html;
-            window.scrollTo(0,0);
         }
 
-        function cicloFigu(id, n) {
-            const a = db.find(x => x.id === id);
-            const el = document.getElementById(`n-${n}`);
-            
-            // Ciclo: Nada -> Tengo -> Repe -> Nada
-            if (!a.tengo.includes(n) && !a.repes.includes(n)) {
-                a.tengo.push(n);
-                el.classList.add('tengo');
-            } else if (a.tengo.includes(n) && !a.repes.includes(n)) {
-                a.repes.push(n);
-                el.classList.add('repe');
-            } else {
-                a.tengo = a.tengo.filter(x => x !== n);
-                a.repes = a.repes.filter(x => x !== n);
-                el.classList.remove('tengo', 'repe');
-                if (filtroFaltantes) el.classList.add('oculto');
-            }
-            
+        function ciclo(id, n) {
+            const a = db.find(x => x.id === id); const el = document.getElementById(`n-${n}`);
+            if (!a.tengo.includes(n)) { a.tengo.push(n); el.classList.add('tengo'); }
+            else if (!a.repes.includes(n)) { a.repes.push(n); el.classList.add('repe'); }
+            else { a.tengo = a.tengo.filter(x => x !== n); a.repes = a.repes.filter(x => x !== n); el.classList.remove('tengo', 'repe'); }
             localStorage.setItem(DB_NAME, JSON.stringify(db));
-            document.getElementById('sub-stats').innerText = `${a.tengo.length} de ${a.total} (${a.repes.length} repes)`;
         }
 
-        function toggleFiltro() {
-            filtroFaltantes = !filtroFaltantes;
-            const tengos = document.querySelectorAll('.nro.tengo');
-            tengos.forEach(x => x.classList.toggle('oculto', filtroFaltantes));
-        }
-
-        function compartirWhatsApp(id) {
-            const a = db.find(x => x.id === id);
-            const faltan = [];
-            for(let i=1; i<=a.total; i++) { if(!a.tengo.includes(i)) faltan.push(i); }
-            
-            let msg = `*CONTROL DE ÁLBUM: ${a.nombre}*\n\n`;
-            msg += `❌ *ME FALTAN:* \n${faltan.join(", ")}\n\n`;
-            msg += `🔄 *TENGO PARA CAMBIAR:* \n${a.repes.length > 0 ? a.repes.join(", ") : "Sin repetidas aún."}`;
-            
-            window.open("https://wa.me/?text=" + encodeURIComponent(msg), '_blank');
-        }
-
-        // --- MANEJO DE FOTOS ---
         function pedirFoto(e, id) {
-            e.stopPropagation();
-            currentId = id;
-            if (confirm("¿SUBIR FOTO DESDE GALERÍA?\n(Presiona 'Cancelar' para usar un link)")) {
-                document.getElementById('photoInput').click();
-            } else {
-                const link = prompt("LINK DE LA FOTO:");
-                if (link) updateAlbumPhoto(id, link);
-            }
+            e.stopPropagation(); currentId = id;
+            if (confirm("¿GALERÍA?")) document.getElementById('photoInput').click();
+            else { const l = prompt("LINK:"); if(l) updateFoto(id, l); }
         }
 
         function handleFileSelect(e) {
-            const reader = new FileReader();
-            reader.onload = (event) => updateAlbumPhoto(currentId, event.target.result);
-            reader.readAsDataURL(e.target.files[0]);
+            const r = new FileReader();
+            r.onload = (ev) => updateFoto(currentId, ev.target.result);
+            r.readAsDataURL(e.target.files[0]);
         }
 
-        function updateAlbumPhoto(id, src) {
+        function updateFoto(id, src) {
             db.find(x => x.id === id).img = src;
             localStorage.setItem(DB_NAME, JSON.stringify(db));
             renderMenu();
         }
 
-        // --- BACKUP ---
+        function compartir(id) {
+            const a = db.find(x => x.id === id);
+            const f = []; for(let i=1; i<=a.total; i++) if(!a.tengo.includes(i)) f.push(i);
+            const m = `*COLECCIÓN: ${a.nombre}*\n❌ FALTAN: ${f.join(", ")}\n🔄 REPES: ${a.repes.join(", ")}`;
+            window.open("https://wa.me/?text=" + encodeURIComponent(m));
+        }
+
         function exportDB() {
-            const blob = new Blob([JSON.stringify({db, userName})], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `rey_de_copas_backup.json`;
-            a.click();
+            const b = new Blob([JSON.stringify({db, userName})], {type: "application/json"});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `mis_colecciones.json`; a.click();
         }
 
         function importDB(e) {
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const data = JSON.parse(ev.target.result);
-                db = data.db; userName = data.userName;
-                localStorage.setItem(DB_NAME, JSON.stringify(db));
-                location.reload();
-            };
-            reader.readAsText(e.target.files[0]);
+            const r = new FileReader();
+            r.onload = (ev) => { const d = JSON.parse(ev.target.result); db = d.db; userName = d.userName; localStorage.setItem(DB_NAME, JSON.stringify(db)); localStorage.setItem('lta_user_name', userName); location.reload(); };
+            r.readAsText(e.target.files[0]);
         }
 
-        function renderNuevoForm() {
-            document.getElementById('main-app').innerHTML = `
-                <button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
-                <div style="background:#1a1a1a; padding:20px; border-radius:15px; border:1px solid var(--accent)">
-                    <h3 style="margin-top:0">NUEVO ÁLBUM</h3>
-                    <input type="text" id="n-nombre" placeholder="NOMBRE (EJ: MÉXICO 86)">
-                    <input type="number" id="n-total" placeholder="CANTIDAD TOTAL">
-                    <button class="btn-accion" onclick="crearCustom()">CREAR ÁLBUM</button>
-                </div>`;
-        }
-
-        function crearCustom() {
-            const n = document.getElementById('n-nombre').value.toUpperCase();
-            const t = parseInt(document.getElementById('n-total').value);
-            if (!n || !t) return alert("COMPLETÁ LOS DATOS");
-            db.push({id: 'a'+Date.now(), nombre: n, total: t, tipo: tipoActual, tengo: [], repes: [], img: ""});
-            localStorage.setItem(DB_NAME, JSON.stringify(db));
-            renderMenu();
-        }
-
-        function eliminarAlbum(e, id) {
-            e.stopPropagation();
-            if(confirm("¿BORRAR COLECCIÓN?")) {
-                db = db.filter(x => x.id !== id);
-                localStorage.setItem(DB_NAME, JSON.stringify(db));
-                renderMenu();
-            }
-        }
+        function eliminarAlbum(e, id) { e.stopPropagation(); if(confirm("¿BORRAR?")) { db = db.filter(x => x.id !== id); localStorage.setItem(DB_NAME, JSON.stringify(db)); renderMenu(); } }
     </script>
 </body>
 </html>
