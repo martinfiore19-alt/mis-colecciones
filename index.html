@@ -3,13 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>App de Colecciones</title>
+    <title>La Taberna de los Álbumes - L.T.A.</title>
     <style>
         :root { --primary: #0288d1; --bg: #121212; --card: #1e1e1e; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; }
         body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         
-        #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; }
-        
+        /* SPLASH SCREEN CON LOGO (MARADONA) */
+        #splash { 
+            position: fixed; 
+            inset: 0; 
+            background: #000; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 99999; 
+            transition: opacity 0.8s;
+        }
+        .logo-img { 
+            width: 80%; /* Ocupa el 80% del ancho de la pantalla */
+            max-width: 350px; /* Tamaño máximo para tablets */
+            border-radius: 50%; /* Hace el logo circular si la imagen no lo es */
+            border: 4px solid var(--primary); /* Borde decorativo azul */
+            animation: pulse 2.5s infinite; /* Efecto de pulso */
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0px rgba(2, 136, 209, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(2, 136, 209, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(2, 136, 209, 0); }
+        }
+
         #main-app { display: none; max-width: 500px; margin: auto; }
         .btn-tipo { background: var(--card); padding: 30px 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
         
@@ -19,7 +42,6 @@
         .prog-container { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 5px; overflow: hidden; }
         .prog-fill { height: 100%; background: var(--primary); transition: width 0.5s; }
 
-        /* GRILLA FIJA - ENTRAN 7 POR FILA */
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 15px; }
         .nro { 
             background: #1e1e1e; 
@@ -33,7 +55,6 @@
             cursor: pointer; 
             transition: all 0.2s;
         }
-        /* CUANDO LA TENGO, SOLO CAMBIA COLOR, NO SE MUEVE */
         .nro.tengo { background: var(--accent) !important; color: white !important; border-color: #fff !important; }
 
         .btn-accion { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
@@ -44,32 +65,37 @@
 <body>
 
     <div id="splash">
-        <h1 style="color:var(--primary)">MI COLECCIÓN</h1>
-        <p>Cargando grilla fija...</p>
+        <img src="https://lh3.googleusercontent.com/pw/AIL4fc-bFjM5eX4x_R_e_E4d0U6mC5y9M-Rj_j_oA_M_M=w600-h600-no" class="logo-img" alt="Logo L.T.A.">
+        <p style="margin-top:20px; color:#aaa">Cargando la Taberna...</p>
     </div>
 
     <div id="main-app"></div>
 
     <script>
+        // Catálogo fijo (Tus recomendaciones)
         const CATALOGO = [
             { id: "f26", nombre: "FIFA 365 2026", total: 630, tipo: "Carta", img: "https://m.media-amazon.com/images/I/71C7x6y-G9L._AC_SL1500_.jpg" },
             { id: "ca24", nombre: "Copa América 2024", total: 430, tipo: "Figurita", img: "https://exitocol.vtexassets.com/arquivos/ids/22373752/Album-Copa-America-2024-Panini.jpg" }
         ];
 
-        let db = JSON.parse(localStorage.getItem('colecciones_v7')) || [];
+        let db = JSON.parse(localStorage.getItem('colecciones_v8')) || [];
         let tipoActual = "";
 
+        // Tiempo de Splash extendido para que el logo se luzca (3 segundos)
         window.onload = () => {
             setTimeout(() => {
-                document.getElementById('splash').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-                renderInicio();
-            }, 1000);
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('main-app').style.display = 'block';
+                    renderInicio();
+                }, 800);
+            }, 3000);
         };
 
         function renderInicio() {
             document.getElementById('main-app').innerHTML = `
-                <h2 style="text-align:center; margin-top:30px">Mis Álbumes</h2>
+                <h2 style="text-align:center; margin-top:30px">La Taberna de los Álbumes</h2>
                 <div class="btn-tipo" onclick="setTipo('Carta')">🃏 CARTAS</div>
                 <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ FIGURITAS</div>
             `;
@@ -106,8 +132,8 @@
                 <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
                 <div style="background:#252525; padding:15px; border-radius:10px; border:1px solid var(--primary)">
                     <h4>Nueva Colección</h4>
-                    <input type="text" id="custom-nombre" placeholder="Nombre" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box">
-                    <input type="number" id="custom-total" placeholder="Cantidad" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box">
+                    <input type="text" id="custom-nombre" placeholder="Nombre (ej: Dragon Ball Z)" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box">
+                    <input type="number" id="custom-total" placeholder="Cantidad total" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box">
                     <button class="btn-accion" onclick="guardarPersonalizada()">CREAR</button>
                 </div>`;
         }
@@ -117,7 +143,7 @@
             const total = parseInt(document.getElementById('custom-total').value);
             if(!nombre || !total) return;
             db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, img: "", tengo: [] });
-            localStorage.setItem('colecciones_v7', JSON.stringify(db));
+            localStorage.setItem('colecciones_v8', JSON.stringify(db));
             renderMenu();
         }
 
@@ -133,7 +159,6 @@
                     </div>
                     <button class="btn-share" onclick="compartirFaltantes('${a.id}')">📲 COMPARTIR FALTANTES</button>
                 </div>
-
                 <div class="grid">`;
             for(let i=1; i<=a.total; i++) {
                 const clase = a.tengo.includes(i) ? 'tengo' : '';
@@ -144,26 +169,19 @@
             window.scrollTo(0,0);
         }
 
-        // LA FUNCIÓN TOGGLE AHORA SOLO CAMBIA LA CLASE CSS, NO BORRA NADA
         function toggle(albumId, nro) {
             const a = db.find(x => x.id === albumId);
             const idx = a.tengo.indexOf(nro);
             const el = document.getElementById(`card-${nro}`);
 
             if(idx > -1) {
-                // Si ya estaba, la quito de la lista y saco el color verde
                 a.tengo.splice(idx, 1);
                 el.classList.remove('tengo');
             } else {
-                // Si no estaba, la agrego y pongo color verde
                 a.tengo.push(nro);
                 el.classList.add('tengo');
             }
-            
-            // Guardo en memoria
-            localStorage.setItem('colecciones_v7', JSON.stringify(db));
-            
-            // Actualizo los numeritos de arriba sin refrescar toda la pantalla
+            localStorage.setItem('colecciones_v8', JSON.stringify(db));
             const txtFaltan = document.querySelector('small[style*="#ff5252"]');
             const txtTengo = document.querySelector('small[style*="var(--accent)"]');
             if(txtFaltan) txtFaltan.innerText = `Faltan: ${a.total - a.tengo.length}`;
@@ -175,7 +193,7 @@
             const faltan = [];
             for(let i=1; i<=a.total; i++) { if(!a.tengo.includes(i)) faltan.push(i); }
             if(faltan.length === 0) return alert("¡Completado!");
-            const texto = `Me faltan estas de *${a.nombre}*:\n\n` + faltan.join(", ");
+            const texto = `¡Hola! Me faltan estas de *${a.nombre}*:\n\n` + faltan.join(", ");
             window.open("https://wa.me/?text=" + encodeURIComponent(texto), '_blank');
         }
     </script>
