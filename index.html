@@ -5,39 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>App de Colecciones</title>
     <style>
-        :root { --primary: #0288d1; --bg: #121212; --card: #1e1e1e; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; --error: #d32f2f; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        :root { --primary: #0288d1; --bg: #121212; --card: #1e1e1e; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         
         #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; }
         
         #main-app { display: none; max-width: 500px; margin: auto; }
-        .btn-tipo { background: var(--card); padding: 40px 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; font-size: 22px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
+        .btn-tipo { background: var(--card); padding: 30px 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
         
-        .album-card { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid #333; cursor: pointer; }
-        .album-card img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; background: #222; }
+        .album-card { background: var(--card); padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; cursor: pointer; }
+        .album-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #222; }
         
-        /* Barra de Progreso */
-        .prog-container { width: 100%; height: 8px; background: #333; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+        /* Barra de Progreso en el Menú */
+        .prog-container { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 5px; overflow: hidden; }
         .prog-fill { height: 100%; background: var(--primary); transition: width 0.5s; }
 
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px; }
-        .nro { background: #1e1e1e; padding: 15px 0; text-align: center; border-radius: 6px; color: #ff5252; border: 1px solid #444; font-weight: bold; cursor: pointer; animation: fadeIn 0.3s; }
-        .nro.tengo { background: var(--accent); color: white; border-color: #fff; opacity: 0.5; }
+        /* GRILLA MINIATURA (7 columnas) */
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 15px; }
+        .nro { 
+            background: #1e1e1e; 
+            padding: 8px 0; 
+            text-align: center; 
+            border-radius: 4px; 
+            color: #ff5252; 
+            border: 1px solid #333; 
+            font-weight: bold; 
+            font-size: 12px; /* Texto más chico */
+            cursor: pointer; 
+        }
+        .nro.tengo { background: var(--accent); color: white; border-color: #fff; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        .btn-accion { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-share { background: var(--whatsapp); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-back { background: #444; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
-        
-        .toggle-show { background: none; border: 1px solid #444; color: #666; width: 100%; padding: 10px; border-radius: 8px; margin-top: 40px; cursor: pointer; font-size: 12px; }
+        .btn-accion { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-share { background: var(--whatsapp); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
+        .btn-back { background: #444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; font-size: 13px; }
     </style>
 </head>
 <body>
 
     <div id="splash">
         <h1 style="color:var(--primary)">MI COLECCIÓN</h1>
-        <p>Cargando tus faltantes...</p>
+        <p>Optimizando vista...</p>
     </div>
 
     <div id="main-app"></div>
@@ -48,21 +55,20 @@
             { id: "ca24", nombre: "Copa América 2024", total: 430, tipo: "Figurita", img: "https://exitocol.vtexassets.com/arquivos/ids/22373752/Album-Copa-America-2024-Panini.jpg" }
         ];
 
-        let db = JSON.parse(localStorage.getItem('colecciones_v5')) || [];
+        let db = JSON.parse(localStorage.getItem('colecciones_v6')) || [];
         let tipoActual = "";
-        let mostrarObtenidas = false;
 
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('splash').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 renderInicio();
-            }, 1200);
+            }, 1000);
         };
 
         function renderInicio() {
             document.getElementById('main-app').innerHTML = `
-                <h1 style="text-align:center; margin-top:50px">Mis Álbumes</h1>
+                <h2 style="text-align:center; margin-top:30px">Mis Álbumes</h2>
                 <div class="btn-tipo" onclick="setTipo('Carta')">🃏 CARTAS</div>
                 <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ FIGURITAS</div>
             `;
@@ -73,20 +79,20 @@
         function renderMenu() {
             const filtrados = db.filter(a => a.tipo === tipoActual);
             let html = `<button class="btn-back" onclick="renderInicio()">⬅ Volver</button>
-                        <h2>${tipoActual}s</h2>
-                        <button class="btn-accion" style="background:#1b5e20" onclick="renderNuevoForm()">+ AGREGAR NUEVA</button><br><br>`;
+                        <h3 style="margin: 10px 0;">Mis ${tipoActual}s</h3>
+                        <button class="btn-accion" style="background:#1b5e20; padding:10px;" onclick="renderNuevoForm()">+ AGREGAR NUEVA</button><br><br>`;
             
             filtrados.forEach(a => {
-                const totalFaltan = a.total - a.tengo.length;
-                const porcFaltante = Math.floor((totalFaltan / a.total) * 100);
-                const porcLleno = 100 - porcFaltante;
+                const totalTengo = a.tengo.length;
+                const porcLleno = Math.floor((totalTengo / a.total) * 100);
+                const porcFaltante = 100 - porcLleno;
 
                 html += `
                     <div class="album-card" onclick="verAlbum('${a.id}')">
-                        <img src="${a.img || 'https://via.placeholder.com/70?text=Album'}">
+                        <img src="${a.img || 'https://via.placeholder.com/50?text=Img'}">
                         <div style="flex:1">
-                            <strong>${a.nombre}</strong><br>
-                            <small style="color:var(--error)">Faltan el ${porcFaltante}% (${totalFaltan} unidades)</small>
+                            <strong style="font-size:14px">${a.nombre}</strong><br>
+                            <small style="color:#aaa; font-size:11px">Falta el ${porcFaltante}% (${a.total - totalTengo} u.)</small>
                             <div class="prog-container"><div class="prog-fill" style="width:${porcLleno}%"></div></div>
                         </div>
                     </div>`;
@@ -95,15 +101,14 @@
         }
 
         function renderNuevoForm() {
-            let html = `
+            document.getElementById('main-app').innerHTML = `
                 <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
-                <div style="background:#252525; padding:20px; border-radius:15px; border:1px solid var(--primary); margin-bottom:20px">
-                    <h3>Nueva Colección</h3>
-                    <input type="text" id="custom-nombre" placeholder="Nombre" style="width:100%; padding:12px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px">
-                    <input type="number" id="custom-total" placeholder="Cantidad de cartas" style="width:100%; padding:12px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px">
-                    <button class="btn-accion" onclick="guardarPersonalizada()">CREAR AHORA</button>
+                <div style="background:#252525; padding:15px; border-radius:10px; border:1px solid var(--primary)">
+                    <h4>Nueva Colección</h4>
+                    <input type="text" id="custom-nombre" placeholder="Nombre" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box">
+                    <input type="number" id="custom-total" placeholder="Cantidad" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box">
+                    <button class="btn-accion" onclick="guardarPersonalizada()">CREAR</button>
                 </div>`;
-            document.getElementById('main-app').innerHTML = html;
         }
 
         function guardarPersonalizada() {
@@ -111,50 +116,31 @@
             const total = parseInt(document.getElementById('custom-total').value);
             if(!nombre || !total) return;
             db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, img: "", tengo: [] });
-            localStorage.setItem('colecciones_v5', JSON.stringify(db));
+            localStorage.setItem('colecciones_v6', JSON.stringify(db));
             renderMenu();
         }
 
         function verAlbum(id) {
             const a = db.find(x => x.id === id);
-            const faltan = [];
-            const tengo = [];
-            for(let i=1; i<=a.total; i++) {
-                if(a.tengo.includes(i)) tengo.push(i);
-                else faltan.push(i);
-            }
-
             let html = `
-                <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10">
+                <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10; border-bottom:1px solid #333">
                     <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
-                    <h2 style="margin:0">${a.nombre}</h2>
-                    <p style="color:#ff5252; margin: 5px 0;"><b>Faltantes: ${faltan.length}</b></p>
-                    <button class="btn-share" onclick="compartirFaltantes('${a.id}')">Compartir Faltantes (WhatsApp)</button>
+                    <h3 style="margin:0">${a.nombre}</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px">
+                         <small style="color:#ff5252">Faltan: ${a.total - a.tengo.length}</small>
+                         <small style="color:var(--accent)">Tengo: ${a.tengo.length}</small>
+                    </div>
+                    <button class="btn-share" onclick="compartirFaltantes('${a.id}')">📲 COMPARTIR FALTANTES</button>
                 </div>
 
-                <div class="grid">
-                    ${faltan.map(n => `<div class="nro" onclick="toggle('${id}', ${n})">${n}</div>`).join('')}
-                </div>`;
-
-            if(mostrarObtenidas && tengo.length > 0) {
-                html += `
-                    <p style="margin-top:40px; color:var(--accent)">YA OBTENIDAS:</p>
-                    <div class="grid">
-                        ${tengo.map(n => `<div class="nro tengo" onclick="toggle('${id}', ${n})">${n}</div>`).join('')}
-                    </div>`;
+                <div class="grid">`;
+            for(let i=1; i<=a.total; i++) {
+                const clase = a.tengo.includes(i) ? 'tengo' : '';
+                html += `<div class="nro ${clase}" onclick="toggle('${id}', ${i})">${i}</div>`;
             }
-
-            html += `<button class="toggle-show" onclick="toggleVista('${id}')">
-                        ${mostrarObtenidas ? 'Ocultar las que ya tengo' : 'Revisar las que ya tengo'}
-                     </button>`;
-
+            html += `</div>`;
             document.getElementById('main-app').innerHTML = html;
             window.scrollTo(0,0);
-        }
-
-        function toggleVista(id) {
-            mostrarObtenidas = !mostrarObtenidas;
-            verAlbum(id);
         }
 
         function toggle(id, n) {
@@ -162,7 +148,7 @@
             const idx = a.tengo.indexOf(n);
             if(idx > -1) a.tengo.splice(idx, 1);
             else a.tengo.push(n);
-            localStorage.setItem('colecciones_v5', JSON.stringify(db));
+            localStorage.setItem('colecciones_v6', JSON.stringify(db));
             verAlbum(id);
         }
 
@@ -171,7 +157,7 @@
             const faltan = [];
             for(let i=1; i<=a.total; i++) { if(!a.tengo.includes(i)) faltan.push(i); }
             if(faltan.length === 0) return alert("¡Completado!");
-            const texto = `Me faltan estas de ${a.nombre}:\n\n` + faltan.join(", ");
+            const texto = `Me faltan estas de *${a.nombre}*:\n\n` + faltan.join(", ");
             window.open("https://wa.me/?text=" + encodeURIComponent(texto), '_blank');
         }
     </script>
