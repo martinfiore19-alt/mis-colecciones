@@ -2,118 +2,90 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Calculador de Calefacción Automático</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculador de Calefacción - Martín Fiore</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; background-color: #f0f2f5; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
-        .upload-area { border: 3px dashed #3498db; padding: 30px; text-align: center; border-radius: 10px; background: #f8fbff; cursor: pointer; transition: 0.3s; margin: 20px 0; }
-        .upload-area:hover { background: #eef7ff; border-color: #2980b9; }
-        table { width: 100%; border-collapse: collapse; margin-top: 25px; display: none; }
-        th, td { padding: 12px; border: 1px solid #dee2e6; text-align: center; }
-        th { background-color: #3498db; color: white; }
-        .resultado-final { display: none; margin-top: 30px; padding: 20px; border-radius: 8px; background-color: #d4edda; border: 1px solid #c3e6cb; }
-        .kcal-destacada { font-size: 1.2em; font-weight: bold; color: #155724; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; text-align: center; }
+        .drop-zone { border: 3px dashed #3498db; padding: 40px; text-align: center; border-radius: 15px; background: #f0f9ff; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .drop-zone:hover { background: #e1f1fd; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; display: none; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: center; }
+        th { background: #3498db; color: white; }
+        .caldera-card { display: none; margin-top: 30px; padding: 20px; border-radius: 10px; background: #27ae60; color: white; text-align: center; }
+        .badge { background: #f39c12; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Calculador Automático: Excel a Radiadores</h1>
+    <h1>Calculador Automático de Radiadores</h1>
+    <p style="text-align: center;">Subí tu Excel con columnas: <b>Ambiente | Largo | Ancho | Alto</b></p>
     
-    <div class="upload-area" onclick="document.getElementById('inputExcel').click()">
-        <p style="font-size: 1.1em; color: #555;"><strong>Hacé clic aquí para cargar tu Excel</strong></p>
-        <p style="font-size: 0.9em; color: #888;">(Columnas: Ambiente | Largo | Ancho | Alto)</p>
-        <input type="file" id="inputExcel" accept=".xlsx, .xls" style="display:none">
+    <div class="drop-zone" onclick="document.getElementById('fileInput').click()">
+        <strong>Click aquí para cargar tu archivo Excel</strong>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" style="display:none">
     </div>
 
-    <table id="tablaResultados">
+    <table id="resTable">
         <thead>
             <tr>
                 <th>Ambiente</th>
-                <th>Volumen (m³)</th>
-                <th>Kcal/h Necesarias</th>
-                <th>Elementos de Radiador</th>
+                <th>Dimensiones</th>
+                <th>Calorías</th>
+                <th>Elementos</th>
             </tr>
         </thead>
-        <tbody id="cuerpoTabla"></tbody>
+        <tbody id="resBody"></tbody>
     </table>
 
-    <div id="resultadoCaldera" class="resultado-final">
-        <h3>Balance Térmico Total</h3>
-        <p>Suma de todos los ambientes: <span id="totalKcal" class="kcal-destacada">0</span> kcal/h</p>
-        <p><strong>Caldera Recomendada:</strong> <span id="modeloSugerido" style="font-weight:bold; color:#d9534f;"></span></p>
+    <div id="calderaBox" class="caldera-card">
+        <h2 id="totalLabel"></h2>
+        <p id="modelLabel" style="font-size: 1.2em; font-weight: bold;"></p>
     </div>
 </div>
 
 <script>
-    document.getElementById('inputExcel').addEventListener('change', function(e) {
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
         const reader = new FileReader();
-        if (!e.target.files[0]) return;
-        
-        reader.readAsArrayBuffer(e.target.files[0]);
-
         reader.onload = function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
             
-            // Convertimos el Excel a una matriz de datos
-            const filas = XLSX.utils.sheet_to_json(sheet, {header: 1});
-            calcularTodo(filas);
-        };
-    });
+            let totalKcal = 0;
+            const body = document.getElementById('resBody');
+            body.innerHTML = '';
 
-    function calcularTodo(datos) {
-        const cuerpo = document.getElementById('cuerpoTabla');
-        cuerpo.innerHTML = "";
-        let totalGeneral = 0;
-        
-        // Empezamos desde la fila 1 para saltar encabezados
-        for(let i = 1; i < datos.length; i++) {
-            let nombre = datos[i][0];
-            let largo  = parseFloat(datos[i][1]);
-            let ancho  = parseFloat(datos[i][2]);
-            let alto   = parseFloat(datos[i][3]);
+            for(let i = 1; i < json.length; i++) {
+                let nom = json[i][0] || `Ambiente ${i}`;
+                let l = parseFloat(json[i][1]) || 0;
+                let an = parseFloat(json[i][2]) || 0;
+                let al = parseFloat(json[i][3]) || 2.6;
 
-            if(!isNaN(largo) && !isNaN(ancho)) {
-                let m3 = largo * ancho * (alto || 2.6); // 2.6 de alto por defecto si falta
-                let kcal = Math.round(m3 * 60); // Coeficiente estándar
-                let elementos = Math.ceil(kcal / 150); // 150 kcal por elemento
-                
-                totalGeneral += kcal;
-
-                cuerpo.innerHTML += `
-                    <tr>
-                        <td>${nombre || 'Ambiente ' + i}</td>
-                        <td>${m3.toFixed(2)} m³</td>
-                        <td>${kcal.toLocaleString()} kcal</td>
-                        <td style="background:#fff3cd; font-weight:bold;">${elementos} elementos</td>
-                    </tr>`;
+                if(l > 0 && an > 0) {
+                    let kcal = Math.round((l * an * al) * 60);
+                    let elem = Math.ceil(kcal / 150);
+                    totalKcal += kcal;
+                    body.innerHTML += `<tr><td>${nom}</td><td>${l}x${an}</td><td>${kcal}</td><td><span class="badge">${elem}</span></td></tr>`;
+                }
             }
-        }
 
-        // Mostrar tabla y resultados
-        document.getElementById('tablaResultados').style.display = "table";
-        document.getElementById('resultadoCaldera').style.display = "block";
-        document.getElementById('totalKcal').innerText = totalGeneral.toLocaleString();
-
-        // Lógica de Caldera con margen de seguridad (1.20)
-        let demandaConMargen = totalGeneral * 1.20;
-        let recomendacion = "";
-
-        if (demandaConMargen <= 20000) {
-            recomendacion = "Caldera de 24.000 kcal/h (Ej: Peisa Diva Única o Baxi Main Four)";
-        } else if (demandaConMargen <= 28000) {
-            recomendacion = "Caldera de 30.000 - 32.000 kcal/h";
-        } else {
-            recomendacion = "Requiere caldera de 36.000 kcal/h o sistema en cascada";
-        }
-        
-        document.getElementById('modeloSugerido').innerText = recomendacion;
-    }
+            document.getElementById('resTable').style.display = 'table';
+            const box = document.getElementById('calderaBox');
+            box.style.display = 'block';
+            document.getElementById('totalLabel').innerText = `Total: ${totalKcal.toLocaleString()} kcal/h`;
+            
+            let finalDemand = totalKcal * 1.2;
+            let model = finalDemand <= 22000 ? "24.000 kcal/h" : finalDemand <= 30000 ? "32.000 kcal/h" : "36.000+ kcal/h";
+            document.getElementById('modelLabel').innerText = `Caldera recomendada: ${model}`;
+        };
+        reader.readAsArrayBuffer(file);
+    });
 </script>
-
 </body>
 </html>
