@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Deudas - Independiente</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --dark: #1e293b;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--dark);
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        .header {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .upload-box {
+            border: 2px dashed #cbd5e1;
+            padding: 2rem;
+            border-radius: 8px;
+            background: #f1f5f9;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .upload-box:hover {
+            border-color: var(--primary);
+            background: #e0e7ff;
+        }
+
+        .client-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border-top: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .client-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+
+        .total-badge {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        th { text-align: left; color: #64748b; padding: 8px; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
+
+        .btn-whatsapp {
+            background-color: var(--success);
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-top: auto;
+        }
+
+        .btn-whatsapp:hover { opacity: 0.9; }
+
+        .empty-state { text-align: center; color: #94a3b8; margin-top: 3rem; grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📊 Filtro de Deudas por Cliente</h1>
+        <p>Carga el archivo Excel para procesar Columnas A, E, F y G</p>
+        
+        <div class="upload-box" onclick="document.getElementById('upload').click()">
+            <strong>Haz clic aquí para subir el archivo</strong>
+            <input type="file" id="upload" accept=".xlsx, .xls" hidden>
+        </div>
+    </div>
+
+    <div id="result" class="client-grid">
+        <div class="empty-state">No hay datos. Cargá tu archivo para empezar.</div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('upload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+            
+            const resumen = {};
+
+            for (let i = 1; i < rows.length; i++) {
+                const fila = rows[i];
+                const nombre = fila[0]; // A
+                
+                if (nombre) {
+                    const totalFact = parseFloat(fila[4]) || 0; // E
+                    const pagoParc = parseFloat(fila[5]) || 0;  // F
+                    const saldoPend = parseFloat(fila[6]) || 0; // G
+
+                    if (!resumen[nombre]) resumen[nombre] = { deudaTotal: 0, facturas: [] };
+
+                    if (saldoPend > 0) {
+                        resumen[nombre].deudaTotal += saldoPend;
+                        resumen[nombre].facturas.push({ t: totalFact, p: pagoParc, s: saldoPend });
+                    }
+                }
+            }
+            renderizar(resumen);
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    function renderizar(datos) {
+        const contenedor = document.getElementById('result');
+        contenedor.innerHTML = '';
+        const nombres = Object.keys(datos).sort();
+
+        if (nombres.length === 0) {
+            contenedor.innerHTML = '<div class="empty-state">No se encontraron saldos pendientes.</div>';
+            return;
+        }
+
+        nombres.forEach(cliente => {
+            const info = datos[cliente];
+            if (info.deudaTotal <= 0) return;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            let tabla = `<table><thead><tr><th>Original</th><th>Pagado</th><th>Saldo</th></tr></thead><tbody>`;
+            info.facturas.forEach(f => {
+                tabla += `<tr><td>$${f.t.toLocaleString()}</td><td>$${f.p.toLocaleString()}</td><td>$${f.s.toLocaleString()}</td></tr>`;
+            });
+            tabla += `</tbody></table>`;
+
+            const mensaje = encodeURIComponent(`Hola ${cliente}, te envío tu saldo pendiente total: $${info.deudaTotal.toLocaleString()}. ¡Saludos!`);
+
+            card.innerHTML = `
+                <div class="client-name">${cliente}</div>
+                <div class="total-badge">Total Adeudado: $${info.deudaTotal.toLocaleString()}</div>
+                ${tabla}
+                <a href="https://wa.me/?text=${mensaje}" target="_blank" class="btn-whatsapp">Enviar WhatsApp</a>
+            `;
+            contenedor.appendChild(card);
+        });
+    }
+</script>
+
+</body>
+</html>
