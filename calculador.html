@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculador de Calefacción Profesional</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; background-color: #f0f2f5; color: #333; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1000px; margin: auto; }
+        h1 { color: #1a3a5a; border-left: 5px solid #3498db; padding-left: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border: 1px solid #e0e0e0; text-align: center; }
+        th { background-color: #3498db; color: white; }
+        .resaltado { font-weight: bold; color: #2c3e50; background-color: #ecf0f1; }
+        .caldera-box { margin-top: 30px; padding: 20px; border-radius: 8px; background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .btn-add { background-color: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        input { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Calculador de Radiadores y Caldera</h1>
+    <p>Ingresá las medidas de tu Excel. El sistema calcula <strong>60 kcal/m³</strong> (ideal para zonas frías como Mendoza).</p>
+
+    <table id="tablaDatos">
+        <thead>
+            <tr>
+                <th>Ambiente (Col A)</th>
+                <th>Largo (Col B)</th>
+                <th>Ancho (Col C)</th>
+                <th>Alto (Col D)</th>
+                <th>Kcal Totales</th>
+                <th>Elementos (150 kcal c/u)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" placeholder="Ej: Living"></td>
+                <td><input type="number" class="l" value="0" oninput="procesar()"></td>
+                <td><input type="number" class="an" value="0" oninput="procesar()"></td>
+                <td><input type="number" class="al" value="2.6" oninput="procesar()"></td>
+                <td class="kcal-res resaltado">0</td>
+                <td class="elem-res resaltado">0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="btn-add" onclick="agregarFila()">+ Agregar Fila</button>
+
+    <div class="caldera-box" id="resultadoCaldera">
+        <h3>Recomendación de Caldera:</h3>
+        <p>Total Calorías Necesarias: <span id="totalKcalGlobal">0</span> kcal/h</p>
+        <p><strong>Modelo Sugerido:</strong> <span id="modeloCaldera">Esperando datos...</span></p>
+    </div>
+</div>
+
+<script>
+    function procesar() {
+        let filas = document.querySelectorAll("#tablaDatos tbody tr");
+        let sumaKcal = 0;
+        const COEF = 60; // Kcal por m3
+        const KCAL_ELEM = 150; // Lo que rinde cada sección de radiador
+
+        filas.forEach(f => {
+            let l = parseFloat(f.querySelector(".l").value) || 0;
+            let an = parseFloat(f.querySelector(".an").value) || 0;
+            let al = parseFloat(f.querySelector(".al").value) || 0;
+
+            let m3 = l * an * al;
+            let kcalAmbiente = Math.round(m3 * COEF);
+            let elementos = Math.ceil(kcalAmbiente / KCAL_ELEM);
+
+            f.querySelector(".kcal-res").innerText = kcalAmbiente.toLocaleString();
+            f.querySelector(".elem-res").innerText = elementos;
+            
+            sumaKcal += kcalAmbiente;
+        });
+
+        document.getElementById("totalKcalGlobal").innerText = sumaKcal.toLocaleString();
+        
+        // Lógica de selección de caldera
+        let recomendacion = "";
+        if (sumaKcal === 0) {
+            recomendacion = "Ingresá datos para calcular.";
+        } else if (sumaKcal <= 18000) {
+            recomendacion = "Caldera de 20.000 kcal/h (Ej: Peisa Diva 24 o similar)";
+        } else if (sumaKcal <= 28000) {
+            recomendacion = "Caldera de 30.000 o 32.000 kcal/h (Para mayor eficiencia)";
+        } else {
+            recomendacion = "Requiere sistema de calderas en cascada o mayor a 36.000 kcal/h";
+        }
+        document.getElementById("modeloCaldera").innerText = recomendacion;
+    }
+
+    function agregarFila() {
+        let tbody = document.querySelector("#tablaDatos tbody");
+        let nueva = tbody.rows[0].cloneNode(true);
+        nueva.querySelectorAll("input").forEach(i => i.value = i.defaultValue || "");
+        tbody.appendChild(nueva);
+    }
+</script>
+
+</body>
+</html>
