@@ -7,48 +7,65 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; }
-        .header { background: #fff; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; margin-bottom: 30px; }
-        .upload-btn { background: #2563eb; color: white; padding: 15px 30px; border-radius: 10px; cursor: pointer; display: inline-block; font-weight: bold; }
+        :root { --blue: #1e40af; --green: #15803d; --gray: #64748b; --bg: #f1f5f9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
+        .container { max-width: 1000px; margin: auto; }
         
-        .client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
-        
-        /* El diseño que se convertirá en imagen */
-        .ticket {
-            background: white; border-radius: 10px; padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 5px solid #2563eb;
+        .header { 
+            background: white; padding: 30px; border-radius: 15px; 
+            text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 30px; 
         }
-        .ticket-header { border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 15px; text-align: center; }
-        .ticket-title { font-size: 1.2rem; font-weight: 800; color: #1e293b; }
+        .upload-area {
+            border: 2px dashed #cbd5e1; padding: 25px; border-radius: 12px;
+            background: #f8fafc; cursor: pointer; transition: 0.3s; margin-top: 15px;
+        }
+        .upload-area:hover { border-color: var(--blue); background: #eff6ff; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 25px; }
+
+        /* Estilo del Ticket para la Imagen */
+        .ticket-wrap { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .ticket-capture { background: white; padding: 20px; border: 1px solid #e2e8f0; border-radius: 4px; }
+        .ticket-header { border-bottom: 2px solid var(--blue); margin-bottom: 15px; padding-bottom: 10px; text-align: center; }
+        .ticket-title { font-weight: 900; font-size: 1.3rem; color: var(--blue); letter-spacing: 1px; }
         
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 10px 0; }
-        th { text-align: left; background: #f8fafc; padding: 8px; border-bottom: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.85rem; }
+        th { text-align: left; background: #f1f5f9; padding: 8px; border-bottom: 1px solid #cbd5e1; }
         td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
 
-        .total-area { background: #eff6ff; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; }
-        .total-monto { font-size: 1.8rem; font-weight: bold; color: #1d4ed8; }
+        .total-box { 
+            background: #1e293b; color: white; padding: 15px; 
+            border-radius: 6px; text-align: center; margin-top: 15px; 
+        }
+        .total-val { font-size: 1.8rem; font-weight: bold; display: block; }
         
-        .btn-action { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-download { background: #059669; color: white; }
-        .btn-adjust { background: #94a3b8; color: white; }
+        /* Botones de acción */
+        .btn { 
+            width: 100%; padding: 12px; border: none; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; 
+        }
+        .btn-adj { background: #94a3b8; color: white; }
+        .btn-img { background: var(--green); color: white; font-size: 1rem; }
+        .btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>📸 Generador de Imágenes de Deuda</h1>
-        <p>Cargá tu Excel y descargá el resumen como foto para WhatsApp</p>
-        <label for="upload" class="upload-btn">📁 Seleccionar Archivo Excel</label>
-        <input type="file" id="upload" accept=".xlsx, .xls" style="display:none">
+        <h1>📸 Generador de Fotos de Deuda</h1>
+        <p>Procesa tu Excel (A, E, F, G) y crea imágenes para enviar por WhatsApp</p>
+        <div class="upload-area" onclick="document.getElementById('upload').click()">
+            <strong>📂 Haz clic para cargar tu archivo de Excel</strong>
+            <input type="file" id="upload" accept=".xlsx, .xls" style="display:none">
+        </div>
     </div>
 
-    <div id="result" class="client-grid"></div>
+    <div id="result" class="grid"></div>
 </div>
 
 <script>
-    let clientesData = {};
+    let storage = {};
 
     document.getElementById('upload').addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -56,53 +73,40 @@
 
         const reader = new FileReader();
         reader.onload = function(evt) {
-            try {
-                const data = new Uint8Array(evt.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
 
-                clientesData = {};
+            storage = {};
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i];
+                const cliente = r[0]; // A
+                const saldo = parseFloat(r[6]) || 0; // G
 
-                for (let i = 1; i < rows.length; i++) {
-                    const f = rows[i];
-                    const nombre = f[0]; // Columna A
-                    const saldo = parseFloat(f[6]) || 0; // Columna G
-
-                    if (nombre && saldo > 0) {
-                        if (!clientesData[nombre]) {
-                            clientesData[nombre] = { totalOrig: 0, recibo: 0, facturas: [] };
-                        }
-                        clientesData[nombre].totalOrig += saldo;
-                        clientesData[nombre].facturas.push({ 
-                            total: f[4], // E
-                            pago: f[5],  // F
-                            saldo: saldo // G
-                        });
-                    }
+                if (cliente && saldo > 0) {
+                    if (!storage[cliente]) storage[cliente] = { bruto: 0, desc: 0, items: [] };
+                    storage[cliente].bruto += saldo;
+                    storage[cliente].items.push({ t: r[4], p: r[5], s: saldo });
                 }
-                render();
-            } catch (err) {
-                alert("Error al leer el Excel. Asegurate de que las columnas sean A, E, F y G.");
-                console.error(err);
             }
+            render();
         };
         reader.readAsArrayBuffer(file);
     });
 
-    function ajustar(nombre) {
-        const monto = prompt(`¿Monto del recibo para ${nombre}? (Escribí 0 si no hay)`, "0");
-        if (monto !== null) {
-            clientesData[nombre].recibo = parseFloat(monto) || 0;
+    function setRecibo(name) {
+        const val = prompt(`¿Monto de recibo o pago nuevo para ${name}?`, "0");
+        if (val !== null) {
+            storage[name].desc = parseFloat(val) || 0;
             render();
         }
     }
 
-    async function descargar(id, nombre) {
-        const elemento = document.getElementById(id);
-        const canvas = await html2canvas(elemento, { scale: 2 });
+    async function saveImg(id, name) {
+        const area = document.getElementById(id);
+        const canvas = await html2canvas(area, { scale: 2, logging: false, useCORS: true });
         const link = document.createElement('a');
-        link.download = `Resumen_${nombre}.png`;
+        link.download = `Saldo_${name.replace(/ /g, '_')}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
     }
@@ -111,39 +115,34 @@
         const grid = document.getElementById('result');
         grid.innerHTML = '';
         
-        const nombres = Object.keys(clientesData).sort();
-        if (nombres.length === 0) {
-            grid.innerHTML = "<p style='text-align:center; grid-column:1/-1;'>No se encontraron deudas.</p>";
-            return;
-        }
-
-        nombres.forEach((cliente, i) => {
-            const info = clientesData[cliente];
-            const final = info.totalOrig - info.recibo;
-            const ticketId = `ticket-${i}`;
+        Object.keys(storage).sort().forEach((nom, i) => {
+            const info = storage[nom];
+            const neto = info.bruto - info.desc;
+            const captureId = `cap-${i}`;
 
             const card = document.createElement('div');
+            card.className = 'ticket-wrap';
             card.innerHTML = `
-                <div id="${ticketId}" class="ticket">
+                <div id="${captureId}" class="ticket-capture">
                     <div class="ticket-header">
-                        <div class="ticket-title">RESUMEN DE CUENTA</div>
-                        <div style="font-size:0.75rem; color:#64748b;">Generado: ${new Date().toLocaleDateString()}</div>
+                        <div class="ticket-title">ESTADO DE CUENTA</div>
+                        <div style="font-size:0.7rem; color:gray;">FECHA: ${new Date().toLocaleDateString()}</div>
                     </div>
-                    <div style="margin-bottom:10px;"><strong>Cliente:</strong> ${cliente}</div>
+                    <div style="font-size:0.9rem; margin-bottom:10px;"><strong>CLIENTE:</strong> ${nom}</div>
                     <table>
-                        <thead><tr><th>Total</th><th>Pago</th><th>Saldo</th></tr></thead>
+                        <thead><tr><th>Factura</th><th>Pago</th><th>Saldo</th></tr></thead>
                         <tbody>
-                            ${info.facturas.map(f => `<tr><td>$${f.total.toLocaleString()}</td><td>$${f.pago.toLocaleString()}</td><td>$${f.saldo.toLocaleString()}</td></tr>`).join('')}
+                            ${info.items.map(item => `<tr><td>$${item.t.toLocaleString()}</td><td>$${item.p.toLocaleString()}</td><td>$${item.s.toLocaleString()}</td></tr>`).join('')}
                         </tbody>
                     </table>
-                    ${info.recibo > 0 ? `<div style="color:#d97706; font-size:0.8rem; margin-top:5px; font-weight:bold;">Recibo aplicado: -$${info.recibo.toLocaleString()}</div>` : ''}
-                    <div class="total-area">
-                        <div style="font-size:0.8rem; color:#1e293b;">SALDO FINAL PENDIENTE</div>
-                        <div class="total-monto">$${final.toLocaleString()}</div>
+                    ${info.desc > 0 ? `<div style="text-align:right; color:red; font-size:0.8rem; font-weight:bold;">Recibo: -$${info.desc.toLocaleString()}</div>` : ''}
+                    <div class="total-box">
+                        <span style="font-size:0.7rem; opacity:0.8;">SALDO FINAL A PAGAR</span>
+                        <span class="total-val">$${neto.toLocaleString()}</span>
                     </div>
                 </div>
-                <button class="btn-action btn-adjust" onclick="ajustar('${cliente}')">✏️ Ajustar Recibo</button>
-                <button class="btn-action btn-download" onclick="descargar('${ticketId}', '${cliente}')">📸 Guardar Imagen</button>
+                <button class="btn btn-adj" onclick="setRecibo('${nom}')">✏️ Ajustar Recibo</button>
+                <button class="btn btn-img" onclick="saveImg('${captureId}', '${nom}')">📸 Guardar Foto</button>
             `;
             grid.appendChild(card);
         });
