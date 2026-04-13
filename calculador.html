@@ -2,101 +2,113 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Calculador de Calefacción Profesional</title>
+    <title>Importador de Excel - Calefacción</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; background-color: #f0f2f5; color: #333; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 1000px; margin: auto; }
-        h1 { color: #1a3a5a; border-left: 5px solid #3498db; padding-left: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 30px; background-color: #f8f9fa; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h1 { color: #2c3e50; text-align: center; }
+        .upload-section { border: 2px dashed #3498db; padding: 20px; text-align: center; border-radius: 10px; background: #ebf5fb; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border: 1px solid #e0e0e0; text-align: center; }
+        th, td { padding: 12px; border: 1px solid #dee2e6; text-align: center; }
         th { background-color: #3498db; color: white; }
-        .resaltado { font-weight: bold; color: #2c3e50; background-color: #ecf0f1; }
-        .caldera-box { margin-top: 30px; padding: 20px; border-radius: 8px; background-color: #d4edda; border: 1px solid #c3e6cb; }
-        .btn-add { background-color: #27ae60; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        input { width: 90%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        .caldera-card { margin-top: 30px; padding: 20px; border-radius: 10px; background-color: #2ecc71; color: white; display: none; }
+        .instrucciones { font-size: 0.9em; color: #666; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>Calculador de Radiadores y Caldera</h1>
-    <p>Ingresá las medidas de tu Excel. El sistema calcula <strong>60 kcal/m³</strong> (ideal para zonas frías como Mendoza).</p>
+<div class="container">
+    <h1>Calculador Automático por Excel</h1>
+    
+    <div class="instrucciones">
+        <strong>Formato del Excel:</strong> Col A: Ambiente | Col B: Largo | Col C: Ancho | Col D: Alto.
+    </div>
 
-    <table id="tablaDatos">
+    <div class="upload-section">
+        <p>Seleccioná o arrastrá tu archivo Excel aquí</p>
+        <input type="file" id="inputExcel" accept=".xlsx, .xls">
+    </div>
+
+    <table id="tablaResultados" style="display:none;">
         <thead>
             <tr>
-                <th>Ambiente (Col A)</th>
-                <th>Largo (Col B)</th>
-                <th>Ancho (Col C)</th>
-                <th>Alto (Col D)</th>
-                <th>Kcal Totales</th>
-                <th>Elementos (150 kcal c/u)</th>
+                <th>Ambiente</th>
+                <th>Dimensiones (m)</th>
+                <th>Volumen (m³)</th>
+                <th>Kcal/h (60 coef.)</th>
+                <th>Elementos (150 kcal)</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td><input type="text" placeholder="Ej: Living"></td>
-                <td><input type="number" class="l" value="0" oninput="procesar()"></td>
-                <td><input type="number" class="an" value="0" oninput="procesar()"></td>
-                <td><input type="number" class="al" value="2.6" oninput="procesar()"></td>
-                <td class="kcal-res resaltado">0</td>
-                <td class="elem-res resaltado">0</td>
-            </tr>
-        </tbody>
+        <tbody id="cuerpoTabla"></tbody>
     </table>
 
-    <button class="btn-add" onclick="agregarFila()">+ Agregar Fila</button>
-
-    <div class="caldera-box" id="resultadoCaldera">
-        <h3>Recomendación de Caldera:</h3>
-        <p>Total Calorías Necesarias: <span id="totalKcalGlobal">0</span> kcal/h</p>
-        <p><strong>Modelo Sugerido:</strong> <span id="modeloCaldera">Esperando datos...</span></p>
+    <div id="boxCaldera" class="caldera-card">
+        <h2>Resultado del Balance Térmico</h2>
+        <p>Demanda Total: <span id="totalKcal">0</span> Kcal/h</p>
+        <p><strong>Caldera Recomendada:</strong> <span id="modeloCaldera"></span></p>
     </div>
 </div>
 
 <script>
-    function procesar() {
-        let filas = document.querySelectorAll("#tablaDatos tbody tr");
-        let sumaKcal = 0;
-        const COEF = 60; // Kcal por m3
-        const KCAL_ELEM = 150; // Lo que rinde cada sección de radiador
+    document.getElementById('inputExcel').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(e.target.files[0]);
 
-        filas.forEach(f => {
-            let l = parseFloat(f.querySelector(".l").value) || 0;
-            let an = parseFloat(f.querySelector(".an").value) || 0;
-            let al = parseFloat(f.querySelector(".al").value) || 0;
-
-            let m3 = l * an * al;
-            let kcalAmbiente = Math.round(m3 * COEF);
-            let elementos = Math.ceil(kcalAmbiente / KCAL_ELEM);
-
-            f.querySelector(".kcal-res").innerText = kcalAmbiente.toLocaleString();
-            f.querySelector(".elem-res").innerText = elementos;
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             
-            sumaKcal += kcalAmbiente;
-        });
+            // Convertir a JSON (Saltando el encabezado si lo tiene)
+            const filas = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+            procesarDatos(filas);
+        };
+    });
 
-        document.getElementById("totalKcalGlobal").innerText = sumaKcal.toLocaleString();
+    function procesarDatos(datos) {
+        const cuerpo = document.getElementById('cuerpoTabla');
+        cuerpo.innerHTML = "";
+        let totalGeneralKcal = 0;
         
-        // Lógica de selección de caldera
-        let recomendacion = "";
-        if (sumaKcal === 0) {
-            recomendacion = "Ingresá datos para calcular.";
-        } else if (sumaKcal <= 18000) {
-            recomendacion = "Caldera de 20.000 kcal/h (Ej: Peisa Diva 24 o similar)";
-        } else if (sumaKcal <= 28000) {
-            recomendacion = "Caldera de 30.000 o 32.000 kcal/h (Para mayor eficiencia)";
-        } else {
-            recomendacion = "Requiere sistema de calderas en cascada o mayor a 36.000 kcal/h";
+        // Empezamos desde i=1 si el excel tiene encabezados, i=0 si no.
+        for(let i = 1; i < datos.length; i++) {
+            let nombre = datos[i][0] || "S/N";
+            let largo = parseFloat(datos[i][1]) || 0;
+            let ancho = parseFloat(datos[i][2]) || 0;
+            let alto = parseFloat(datos[i][3]) || 0;
+
+            if(largo > 0) {
+                let m3 = largo * ancho * alto;
+                let kcal = Math.round(m3 * 60);
+                let elementos = Math.ceil(kcal / 150);
+                totalGeneralKcal += kcal;
+
+                let tr = `<tr>
+                    <td>${nombre}</td>
+                    <td>${largo}x${ancho}x${alto}</td>
+                    <td>${m3.toFixed(2)}</td>
+                    <td>${kcal.toLocaleString()}</td>
+                    <td><strong>${elementos}</strong></td>
+                </tr>`;
+                cuerpo.innerHTML += tr;
+            }
         }
-        document.getElementById("modeloCaldera").innerText = recomendacion;
+
+        mostrarResultados(totalGeneralKcal);
     }
 
-    function agregarFila() {
-        let tbody = document.querySelector("#tablaDatos tbody");
-        let nueva = tbody.rows[0].cloneNode(true);
-        nueva.querySelectorAll("input").forEach(i => i.value = i.defaultValue || "");
-        tbody.appendChild(nueva);
+    function mostrarResultados(total) {
+        document.getElementById('tablaResultados').style.display = "table";
+        document.getElementById('boxCaldera').style.display = "block";
+        document.getElementById('totalKcal').innerText = total.toLocaleString();
+
+        let recomendacion = "";
+        if (total <= 20000) recomendacion = "Caldera de 24.000 Kcal/h (Tipo Peisa Diva o similar)";
+        else if (total <= 30000) recomendacion = "Caldera de 32.000 Kcal/h";
+        else recomendacion = "Sistema de alto rendimiento o calderas en cascada (+36.000 Kcal/h)";
+        
+        document.getElementById('modeloCaldera').innerText = recomendacion;
     }
 </script>
 
