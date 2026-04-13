@@ -3,60 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Cobranzas - Solo WhatsApp</title>
+    <title>Gestor de Cobranzas - WhatsApp Directo</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --primary: #2563eb; --whatsapp: #25d366; --bg: #f8fafc; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); padding: 20px; color: #1e293b; }
+        :root { --primary: #2563eb; --whatsapp: #22c35e; --bg: #f1f5f9; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: auto; }
         
         .header { 
-            background: white; padding: 25px; border-radius: 12px; 
-            text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; 
+            background: white; padding: 25px; border-radius: 15px; 
+            text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 25px; 
         }
-        .upload-area { 
-            border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; 
-            background: #f1f5f9; cursor: pointer; transition: 0.3s;
+        .upload-btn { 
+            background: var(--primary); color: white; padding: 12px 24px; 
+            border-radius: 8px; cursor: pointer; display: inline-block; font-weight: bold;
         }
-        .upload-area:hover { border-color: var(--primary); }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
         
         .card { 
-            background: white; padding: 20px; border-radius: 10px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 4px solid var(--primary);
-            display: flex; flex-direction: column;
+            background: white; padding: 20px; border-radius: 12px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 5px solid var(--primary);
         }
         
-        .client-name { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; color: #0f172a; }
-        .debt-total { font-size: 1.6rem; font-weight: bold; color: #dc2626; margin: 10px 0; }
+        .client-name { font-weight: bold; font-size: 1.2rem; color: #1e293b; margin-bottom: 10px; }
+        .debt-total { font-size: 1.8rem; font-weight: bold; color: #dc2626; margin: 10px 0; }
         
         .btn { 
-            width: 100%; padding: 12px; border: none; border-radius: 8px; 
-            font-weight: bold; cursor: pointer; margin-top: 8px; 
-            text-decoration: none; display: inline-block; text-align: center;
+            width: 100%; padding: 14px; border: none; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; margin-top: 10px; 
+            text-decoration: none; display: block; text-align: center; box-sizing: border-box;
         }
-        .btn-ws { background: var(--whatsapp); color: white; transition: 0.2s; }
-        .btn-ws:hover { background: #128c7e; }
-        .btn-adj { background: #94a3b8; color: white; font-size: 0.85rem; }
+        .btn-ws { background: var(--whatsapp); color: white; font-size: 1rem; }
+        .btn-adj { background: #94a3b8; color: white; font-size: 0.8rem; }
+        
+        .empty { text-align: center; color: #64748b; margin-top: 50px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>📲 Envío de Saldos por WhatsApp</h1>
-        <p>Cargá tu Excel y enviá el resumen directamente sin descargar nada.</p>
-        <div class="upload-area" onclick="document.getElementById('upload').click()">
-            <strong>📂 Seleccionar Archivo Excel</strong>
-            <input type="file" id="upload" accept=".xlsx, .xls" style="display:none">
-        </div>
+        <h1>📲 Enviar de Saldos</h1>
+        <p>Seleccioná el Excel para ver los botones de WhatsApp</p>
+        <label for="upload" class="upload-btn">📁 Cargar Archivo Excel</label>
+        <input type="file" id="upload" accept=".xlsx, .xls" style="display:none">
     </div>
-    <div id="result" class="grid"></div>
+
+    <div id="result" class="grid">
+        <div class="empty">Esperando archivo...</div>
+    </div>
 </div>
 
 <script>
-    let clientes = {};
+    let datosClientes = {};
 
     document.getElementById('upload').addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -66,67 +66,85 @@
         reader.onload = function(evt) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
-            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
 
-            clientes = {};
-            // Procesamos filas (A: Cliente, E: Total, F: Pago, G: Saldo)
+            datosClientes = {};
+
+            // Empezamos en 1 para saltar el encabezado
             for (let i = 1; i < rows.length; i++) {
                 const r = rows[i];
-                const nombre = r[0];
-                const saldo = parseFloat(r[6]) || 0;
+                const nombre = r[0]; // Columna A
+                const saldo = parseFloat(r[6]) || 0; // Columna G
 
                 if (nombre && saldo > 0) {
-                    if (!clientes[nombre]) clientes[nombre] = { deudaTotal: 0, recibo: 0, facturas: [] };
-                    clientes[nombre].deudaTotal += saldo;
-                    clientes[nombre].facturas.push({ total: r[4], pago: r[5], saldo: saldo });
+                    if (!datosClientes[nombre]) {
+                        datosClientes[nombre] = { bruto: 0, recibo: 0, facturas: [] };
+                    }
+                    datosClientes[nombre].bruto += saldo;
+                    datosClientes[nombre].facturas.push({
+                        total: r[4] || 0, // E
+                        pago: r[5] || 0,  // F
+                        saldo: saldo      // G
+                    });
                 }
             }
-            dibujar();
+            dibujarCards();
         };
         reader.readAsArrayBuffer(file);
     });
 
-    function ajustarRecibo(nombre) {
-        const valor = prompt(`Monto de recibo de cobranza para ${nombre}:`, "0");
-        if (valor !== null) {
-            clientes[nombre].recibo = parseFloat(valor) || 0;
-            dibujar();
+    function ajustar(nombre) {
+        const val = prompt(`Monto del recibo para ${nombre}:`, "0");
+        if (val !== null) {
+            datosClientes[nombre].recibo = parseFloat(val) || 0;
+            dibujarCards();
         }
     }
 
-    function dibujar() {
-        const grid = document.getElementById('result');
-        grid.innerHTML = '';
+    function dibujarCards() {
+        const contenedor = document.getElementById('result');
+        contenedor.innerHTML = '';
         
-        Object.keys(clientes).sort().forEach(nom => {
-            const info = clientes[nom];
-            const saldoFinal = info.deudaTotal - info.recibo;
+        const nombres = Object.keys(datosClientes).sort();
+        
+        if (nombres.length === 0) {
+            contenedor.innerHTML = '<div class="empty">No se encontraron clientes con saldo pendiente.</div>';
+            return;
+        }
 
-            // Formateamos el mensaje para que en WhatsApp se vea con negritas y ordenado
-            let txt = `*RESUMEN DE CUENTA*\n`;
-            txt += `👤 *Cliente:* ${nom}\n`;
-            txt += `──────────────────\n`;
+        nombres.forEach(nom => {
+            const info = datosClientes[nom];
+            const neto = info.bruto - info.recibo;
+
+            // Construir el texto para WhatsApp
+            let msj = `*RESUMEN DE CUENTA*\n`;
+            msj += `👤 *Cliente:* ${nom}\n`;
+            msj += `──────────────────\n`;
+            
             info.facturas.forEach(f => {
-                txt += `• Fact: $${f.total} (Pagó $${f.pago}) -> *Saldo: $${f.saldo}*\n`;
+                msj += `• Saldo Factura: *$${f.saldo.toLocaleString()}*\n`;
             });
-            
+
             if (info.recibo > 0) {
-                txt += `──────────────────\n`;
-                txt += `➖ *Recibo cobrado:* -$${info.recibo}\n`;
+                msj += `──────────────────\n`;
+                msj += `➖ *Recibo cobrado:* -$${info.recibo.toLocaleString()}\n`;
             }
-            
-            txt += `──────────────────\n`;
-            txt += `💰 *TOTAL PENDIENTE: $${saldoFinal.toLocaleString()}*`;
 
-            const linkWS = `https://wa.me/?text=${encodeURIComponent(txt)}`;
+            msj += `──────────────────\n`;
+            msj += `💰 *TOTAL PENDIENTE: $${neto.toLocaleString()}*`;
 
-            grid.innerHTML += `
-                <div class="card">
-                    <div class="client-name">${nom}</div>
-                    <div class="debt-total">$${saldoFinal.toLocaleString()}</div>
-                    <button class="btn btn-adj" onclick="ajustarRecibo('${nom}')">✏️ Ajustar / Restar Recibo</button>
-                    <a href="${linkWS}" target="_blank" class="btn btn-ws">📲 Enviar por WhatsApp</a>
-                </div>`;
+            const link = `https://wa.me/?text=${encodeURIComponent(msj)}`;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="client-name">${nom}</div>
+                <div class="debt-total">$${neto.toLocaleString()}</div>
+                <button class="btn btn-adj" onclick="ajustar('${nom}')">✏️ Restar Recibo</button>
+                <a href="${link}" target="_blank" class="btn btn-ws">📲 Enviar WhatsApp</a>
+            `;
+            contenedor.appendChild(card);
         });
     }
 </script>
