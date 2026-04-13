@@ -8,39 +8,24 @@
         :root { --primary: #ffffff; --bg: #000000; --card: #1a1a1a; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; --red: #ff5252; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         
-        #splash { 
-            position: fixed; inset: 0; background: #000; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 99999; transition: opacity 0.5s;
-        }
+        #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; transition: opacity 0.5s; }
         .logo-img { width: 80%; max-width: 300px; border-radius: 50%; border: 2px solid #333; }
 
-        #login-screen {
-            position: fixed; inset: 0; background: #000;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 99998; padding: 30px; text-align: center;
-        }
+        #login-screen { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 99998; padding: 30px; text-align: center; }
 
         #main-app { display: none; max-width: 500px; margin: auto; }
         
         .btn-tipo { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
         .album-card { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; cursor: pointer; }
-        .album-card img { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; }
         
         .prog-container { width: 100%; height: 5px; background: #333; border-radius: 3px; margin-top: 6px; overflow: hidden; }
         .prog-fill { height: 100%; background: var(--accent); transition: width 0.5s; }
 
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
-        .nro { 
-            background: #1a1a1a; padding: 12px 0; text-align: center; border-radius: 4px; 
-            color: var(--red); border: 1px solid #333; font-weight: bold; font-size: 11px; 
-            cursor: pointer; 
-        }
+        .nro { background: #1a1a1a; padding: 12px 0; text-align: center; border-radius: 4px; color: var(--red); border: 1px solid #333; font-weight: bold; font-size: 11px; cursor: pointer; }
         .nro.tengo { background: var(--accent) !important; color: white !important; border-color: #fff !important; }
 
-        input[type="text"], input[type="number"] {
-            width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-size: 16px; margin-bottom: 15px;
-        }
+        input, select { width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-size: 16px; margin-bottom: 15px; text-transform: uppercase; }
         .btn-accion { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-share { background: var(--whatsapp); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
         .btn-back { background: #222; color: #aaa; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
@@ -50,22 +35,64 @@
 
     <div id="splash">
         <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" class="logo-img" onerror="this.src='https://via.placeholder.com/300?text=L.T.A.'">
-        <p style="margin-top:20px; color:#555;">LA TABERNA DE LOS ÁLBUMES</p>
+        <p style="margin-top:20px; color:#555; font-weight: bold;">LA TABERNA DE LOS ÁLBUMES</p>
     </div>
 
     <div id="login-screen">
         <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" style="width:100px; border-radius:50%; margin-bottom:20px;">
-        <h2 style="margin-bottom:20px">¿Cómo te llamás?</h2>
-        <input type="text" id="user-name-input" placeholder="Escribí tu nombre...">
+        <h2 style="margin-bottom:20px">¿CÓMO TE LLAMÁS?</h2>
+        <input type="text" id="user-name-input" placeholder="ESCRIBÍ TU NOMBRE...">
         <button class="btn-accion" onclick="saveUser()">CONTINUAR</button>
     </div>
 
     <div id="main-app"></div>
 
     <script>
-        // Cambiamos el nombre de la base de datos para resetear y forzar la actualización visual
-        const DB_NAME = 'lta_final_v12';
+        const DB_NAME = 'lta_final_v15';
         const LOGO_URL = "https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png";
+
+        const RAW_CATALOGO = [
+            { n: "Copa Mundial de la FIFA 2026 Adrenalyn XL", t: 630 },
+            { n: "FIFA 365: 2025-2026 Adrenalyn XL", t: 450 },
+            { n: "Copa Mundial de Clubes de la FIFA 2025. Adrenalyn XL", t: 387 },
+            { n: "FIFA 365 2024-2025 Adrenalyn XL", t: 441 },
+            { n: "Fútbol Argentino 2024 Adrenalyn XL", t: 538 },
+            { n: "FIFA 365 2023-2024 Adrenalyn XL", t: 441 },
+            { n: "Copa Mundial Femenina de la FIFA 2023. Adrenalyn XL", t: 375 },
+            { n: "Fútbol Argentino 2023. Adrenalyn XL", t: 536 },
+            { n: "FIFA 365: 2022-2023. Adrenalyn XL", t: 441 },
+            { n: "Clase Top 2021-2022. Adrenalyn XL", t: 438 },
+            { n: "Copa Mundial de la FIFA Qatar 2022. Adrenalyn XL", t: 495 },
+            { n: "Camino a la Copa Mundial de la FIFA Qatar 2022. Adrenalyn XL", t: 494 },
+            { n: "Fútbol Argentino 2021. Adrenalyn XL", t: 501 },
+            { n: "FIFA 365: 2020-2021. Adrenalyn XL", t: 398 },
+            { n: "Previa de la UEFA Euro 2020. Adrenalyn XL", t: 709 },
+            { n: "Fútbol Argentino 2020. Adrenalyn XL", t: 173 },
+            { n: "FIFA 365: 2019-2020. Adrenalyn XL", t: 550 },
+            { n: "FIFA 365: 2018-2019. Adrenalyn XL", t: 396 },
+            { n: "Copa Mundial de la FIFA Rusia 2018. Adrenalyn XL", t: 622 },
+            { n: "FIFA 365: 2017-2018. Adrenalyn XL", t: 573 },
+            { n: "Camino a la Copa Mundial de la FIFA Rusia 2018. Adrenalyn XL", t: 608 },
+            { n: "Fútbol Argentino 2017. Adrenalyn XL", t: 307 },
+            { n: "FIFA 365: 2016-2017. Adrenalyn XL", t: 703 },
+            { n: "Copa América Centenario. Estados Unidos 2016. Adrenalyn XL", t: 315 },
+            { n: "FIFA 365: 2015-2016. Adrenalyn XL", t: 491 },
+            { n: "Copa América. Chile 2015. Adrenalyn XL", t: 245 },
+            { n: "Copa Mundial de la FIFA Brasil 2014. Adrenalyn XL", t: 678 },
+            { n: "Liga de Campeones de la UEFA 2013-2014. Adrenalyn XL", t: 450 },
+            { n: "Camino a la Copa Mundial de la FIFA Brasil 2014. Adrenalyn XL", t: 278 },
+            { n: "Fútbol Argentino 2013. Adrenalyn XL", t: 350 },
+            { n: "Liga de Campeones de la UEFA 2012-2013. Adrenalyn XL", t: 555 },
+            { n: "Fútbol Argentino 2012. Adrenalyn XL", t: 350 },
+            { n: "Liga de Campeones de la UEFA 2011-2012. Adrenalyn XL", t: 412 },
+            { n: "Liga de Campeones de la UEFA 2010-2011. Adrenalyn XL", t: 500 },
+            { n: "Copa Mundial de la FIFA Sudáfrica 2010. Adrenalyn XL", t: 350 },
+            { n: "CONMEBOL: Libertadores y Sudamericana 2024. Adrenalyn XL", t: 383 }
+        ];
+
+        const CATALOGO_CARTAS = RAW_CATALOGO
+            .map(item => ({ n: item.n.toUpperCase(), t: item.t }))
+            .sort((a, b) => a.n.localeCompare(b.n));
 
         let db = JSON.parse(localStorage.getItem(DB_NAME)) || [];
         let userName = localStorage.getItem('lta_user_name_v12') || "";
@@ -76,18 +103,15 @@
                 document.getElementById('splash').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('splash').style.display = 'none';
-                    if (userName === "") {
-                        document.getElementById('login-screen').style.display = 'flex';
-                    } else {
-                        showApp();
-                    }
+                    if (userName === "") document.getElementById('login-screen').style.display = 'flex';
+                    else showApp();
                 }, 500);
             }, 1500);
         };
 
         function saveUser() {
-            const input = document.getElementById('user-name-input').value.trim();
-            if (input === "") return alert("Poné un nombre para seguir");
+            const input = document.getElementById('user-name-input').value.trim().toUpperCase();
+            if (input === "") return alert("PONÉ UN NOMBRE PARA SEGUIR");
             localStorage.setItem('lta_user_name_v12', input);
             userName = input;
             document.getElementById('login-screen').style.display = 'none';
@@ -103,39 +127,37 @@
             document.getElementById('main-app').innerHTML = `
                 <div style="text-align:center; margin: 30px 0;">
                     <img src="${LOGO_URL}" style="width:70px; border-radius:50%; border: 1px solid #333;">
-                    <h2 style="margin-top:10px">¡Hola, ${userName}!</h2>
-                    <p style="color:#444; font-size:12px; margin-top:-5px">Coleccionista oficial L.T.A.</p>
+                    <h2 style="margin-top:10px">¡HOLA, ${userName}!</h2>
+                    <p style="color:#444; font-size:12px; margin-top:-5px">¿QUÉ VAMOS A COMPLETAR HOY?</p>
                 </div>
                 <div class="btn-tipo" onclick="setTipo('Carta')">🃏 MIS CARTAS</div>
                 <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ MIS FIGURITAS</div>
-                <p style="text-align:center; color:#222; font-size:10px; margin-top:50px;" onclick="resetUser()">Cambiar nombre</p>
+                <p style="text-align:center; color:#222; font-size:10px; margin-top:50px;" onclick="resetUser()">CAMBIAR NOMBRE</p>
             `;
         }
 
-        function resetUser() {
-            localStorage.removeItem('lta_user_name_v12');
-            location.reload();
-        }
+        function resetUser() { localStorage.removeItem('lta_user_name_v12'); location.reload(); }
 
         function setTipo(t) { tipoActual = t; renderMenu(); }
 
         function renderMenu() {
             const filtrados = db.filter(a => a.tipo === tipoActual);
-            let html = `<button class="btn-back" onclick="renderInicio()">⬅ Volver</button>
-                        <h3 style="margin-bottom:15px;">Sección ${tipoActual}s</h3>
-                        <button class="btn-accion" style="padding:10px; font-size:14px;" onclick="renderNuevoForm()">+ AGREGAR NUEVA</button><br><br>`;
+            let btnTexto = tipoActual === 'Carta' ? '+ AGREGAR DESDE CATÁLOGO' : '+ NUEVO ÁLBUM';
+            
+            let html = `<button class="btn-back" onclick="renderInicio()">⬅ VOLVER</button>
+                        <h3 style="margin-bottom:15px;">SECCIÓN ${tipoActual.toUpperCase()}S</h3>
+                        <button class="btn-accion" style="padding:12px; font-size:14px;" onclick="renderNuevoForm()"> ${btnTexto}</button><br><br>`;
             
             filtrados.forEach(a => {
                 const totalTengo = a.tengo.length;
                 const porcFaltante = Math.floor(((a.total - totalTengo) / a.total) * 100);
                 const porcLleno = 100 - porcFaltante;
-
                 html += `
                     <div class="album-card" onclick="verAlbum('${a.id}')">
-                        <img src="${a.img || 'https://via.placeholder.com/55?text=Album'}" onerror="this.src='https://via.placeholder.com/55?text=Album'">
+                        <div style="width:55px; height:55px; background:#222; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px">${tipoActual === 'Carta' ? '🃏' : '⚽'}</div>
                         <div style="flex:1">
-                            <strong style="font-size:15px">${a.nombre}</strong><br>
-                            <small style="color:var(--red); font-size:11px">Falta el ${porcFaltante}% (${a.total - totalTengo} u.)</small>
+                            <strong style="font-size:14px">${a.nombre}</strong><br>
+                            <small style="color:var(--red); font-size:11px">FALTA EL ${porcFaltante}% (${a.total - totalTengo} U.)</small>
                             <div class="prog-container"><div class="prog-fill" style="width:${porcLleno}%"></div></div>
                         </div>
                     </div>`;
@@ -144,21 +166,43 @@
         }
 
         function renderNuevoForm() {
+            let catalogoHtml = '';
+            if (tipoActual === 'Carta') {
+                let options = CATALOGO_CARTAS.map((item, index) => `<option value="${index}">${item.n} (${item.t})</option>`).join('');
+                catalogoHtml = `
+                    <h4 style="margin-top:0">ELEGIR DEL CATÁLOGO ADRENALYN</h4>
+                    <select id="select-catalogo">${options}</select>
+                    <hr style="border:0; border-top:1px solid #333; margin:15px 0">
+                    <p style="font-size:12px; color:#666">O AGREGÁ UNA PERSONALIZADA:</p>
+                `;
+            } else {
+                catalogoHtml = `<h4 style="margin-top:0">NUEVA COLECCIÓN DE FIGURITAS</h4>`;
+            }
+            
             document.getElementById('main-app').innerHTML = `
-                <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
-                <div style="background:#111; padding:20px; border-radius:15px;">
-                    <h4>Nueva Colección</h4>
-                    <input type="text" id="custom-nombre" placeholder="Nombre">
-                    <input type="number" id="custom-total" placeholder="Cantidad Total">
-                    <button class="btn-accion" onclick="guardarPersonalizada()">CREAR</button>
+                <button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
+                <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #333">
+                    ${catalogoHtml}
+                    <input type="text" id="custom-nombre" placeholder="NOMBRE">
+                    <input type="number" id="custom-total" placeholder="TOTAL DE ITEMS">
+                    <button class="btn-accion" onclick="guardarColeccion()">AGREGAR A MI LISTA</button>
                 </div>`;
         }
 
-        function guardarPersonalizada() {
-            const nombre = document.getElementById('custom-nombre').value;
-            const total = parseInt(document.getElementById('custom-total').value);
-            if(!nombre || !total) return;
-            db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, img: "", tengo: [] });
+        function guardarColeccion() {
+            const select = document.getElementById('select-catalogo');
+            const customNombre = document.getElementById('custom-nombre').value.trim().toUpperCase();
+            const customTotal = parseInt(document.getElementById('custom-total').value);
+            let nombre, total;
+            if (customNombre !== "" && !isNaN(customTotal)) {
+                nombre = customNombre; total = customTotal;
+            } else if (tipoActual === 'Carta' && select) {
+                const item = CATALOGO_CARTAS[select.value];
+                nombre = item.n; total = item.t;
+            } else {
+                return alert("COMPLETÁ LOS DATOS");
+            }
+            db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, tengo: [] });
             localStorage.setItem(DB_NAME, JSON.stringify(db));
             renderMenu();
         }
@@ -167,11 +211,11 @@
             const a = db.find(x => x.id === id);
             let html = `
                 <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10; border-bottom:1px solid #222">
-                    <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
-                    <h3 style="margin:0">${a.nombre}</h3>
-                    <div style="display:flex; justify-content:space-between; margin-top:5px">
-                         <small style="color:var(--red)">Faltan: ${a.total - a.tengo.length}</small>
-                         <small style="color:var(--accent)">Tengo: ${a.tengo.length}</small>
+                    <button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
+                    <h3 style="margin:0; font-size:16px;">${a.nombre}</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px">
+                         <small style="color:var(--red)">FALTAN: ${a.total - a.tengo.length}</small>
+                         <small style="color:var(--accent)">TENGO: ${a.tengo.length}</small>
                     </div>
                     <button class="btn-share" onclick="compartirFaltantes('${a.id}')">📲 COMPARTIR FALTANTES</button>
                 </div>
@@ -192,15 +236,15 @@
             if(idx > -1) { a.tengo.splice(idx, 1); el.classList.remove('tengo'); } 
             else { a.tengo.push(nro); el.classList.add('tengo'); }
             localStorage.setItem(DB_NAME, JSON.stringify(db));
-            document.querySelector('small[style*="var(--red)"]').innerText = `Faltan: ${a.total - a.tengo.length}`;
-            document.querySelector('small[style*="var(--accent)"]').innerText = `Tengo: ${a.tengo.length}`;
+            document.querySelector('small[style*="var(--red)"]').innerText = `FALTAN: ${a.total - a.tengo.length}`;
+            document.querySelector('small[style*="var(--accent)"]').innerText = `TENGO: ${a.tengo.length}`;
         }
 
         function compartirFaltantes(id) {
             const a = db.find(x => x.id === id);
             const faltan = [];
             for(let i=1; i<=a.total; i++) { if(!a.tengo.includes(i)) faltan.push(i); }
-            const texto = `¡Hola! Me faltan estas de *${a.nombre}*:\n\n` + faltan.join(", ");
+            const texto = `¡HOLA! ME FALTAN ESTAS DE *${a.nombre}*:\n\n` + faltan.join(", ");
             window.open("https://wa.me/?text=" + encodeURIComponent(texto), '_blank');
         }
     </script>
