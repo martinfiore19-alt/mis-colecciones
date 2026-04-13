@@ -3,107 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Deudas - Independiente</title>
+    <title>Gestor de Cobranzas - Modo Imagen</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root {
-            --primary: #2563eb;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-            --dark: #1e293b;
+        :root { --primary: #2563eb; --success: #22c55e; --bg: #f8fafc; --dark: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); padding: 20px; color: var(--dark); }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; }
+        .upload-box { border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; background: #f1f5f9; cursor: pointer; }
+        
+        .client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+        
+        /* Estilo del comprobante que se convertirá en imagen */
+        .comprobante {
+            background: white; border: 1px solid #eee; padding: 25px; border-radius: 8px;
+            width: 350px; position: relative;
         }
+        .comp-header { border-bottom: 2px solid var(--primary); margin-bottom: 15px; padding-bottom: 10px; }
+        .comp-title { font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
+        .total-box { background: #f1f5f9; padding: 15px; text-align: center; margin: 15px 0; border-radius: 6px; }
+        .total-monto { font-size: 1.8rem; font-weight: bold; color: #d93025; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        th { text-align: left; color: #64748b; padding: 6px; border-bottom: 1px solid #eee; }
+        td { padding: 6px; border-bottom: 1px solid #eee; }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg); 
-            margin: 0; 
-            padding: 20px; 
-            color: var(--dark);
+        .btn-descargar {
+            background-color: var(--primary); color: white; border: none; width: 100%;
+            padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px;
         }
-
-        .container { max-width: 1000px; margin: 0 auto; }
-
-        .header {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .upload-box {
-            border: 2px dashed #cbd5e1;
-            padding: 2rem;
-            border-radius: 8px;
-            background: #f1f5f9;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-        }
-
-        .upload-box:hover {
-            border-color: var(--primary);
-            background: #e0e7ff;
-        }
-
-        .client-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            border-top: 4px solid var(--primary);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .client-name {
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #0f172a;
-        }
-
-        .total-badge {
-            background: #fee2e2;
-            color: var(--danger);
-            padding: 8px;
-            border-radius: 6px;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-        }
-
-        th { text-align: left; color: #64748b; padding: 8px; border-bottom: 2px solid #f1f5f9; }
-        td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
-
-        .btn-whatsapp {
-            background-color: var(--success);
-            color: white;
-            text-decoration: none;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 600;
-            margin-top: auto;
-        }
-
-        .btn-whatsapp:hover { opacity: 0.9; }
-
+        .btn-recibo { background: #64748b; color: white; border: none; padding: 8px; width: 100%; border-radius: 8px; margin-bottom: 5px; cursor: pointer; }
+        
         .empty-state { text-align: center; color: #94a3b8; margin-top: 3rem; grid-column: 1 / -1; }
     </style>
 </head>
@@ -111,85 +42,95 @@
 
 <div class="container">
     <div class="header">
-        <h1>📊 Filtro de Deudas por Cliente</h1>
-        <p>Carga el archivo Excel para procesar Columnas A, E, F y G</p>
-        
+        <h1>📸 Generador de Comprobantes</h1>
+        <p>Carga el Excel, ajusta el recibo y descarga la imagen para enviar.</p>
         <div class="upload-box" onclick="document.getElementById('upload').click()">
-            <strong>Haz clic aquí para subir el archivo</strong>
+            <strong>Subir Archivo Excel</strong>
             <input type="file" id="upload" accept=".xlsx, .xls" hidden>
         </div>
     </div>
 
-    <div id="result" class="client-grid">
-        <div class="empty-state">No hay datos. Cargá tu archivo para empezar.</div>
-    </div>
+    <div id="result" class="client-grid"></div>
 </div>
 
 <script>
+    let datosGlobales = {};
+
     document.getElementById('upload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
-            
-            const resumen = {};
-
+            datosGlobales = {};
             for (let i = 1; i < rows.length; i++) {
                 const fila = rows[i];
-                const nombre = fila[0]; // A
-                
+                const nombre = fila[0];
                 if (nombre) {
-                    const totalFact = parseFloat(fila[4]) || 0; // E
-                    const pagoParc = parseFloat(fila[5]) || 0;  // F
-                    const saldoPend = parseFloat(fila[6]) || 0; // G
-
-                    if (!resumen[nombre]) resumen[nombre] = { deudaTotal: 0, facturas: [] };
-
-                    if (saldoPend > 0) {
-                        resumen[nombre].deudaTotal += saldoPend;
-                        resumen[nombre].facturas.push({ t: totalFact, p: pagoParc, s: saldoPend });
+                    const saldo = parseFloat(fila[6]) || 0;
+                    if (saldo > 0) {
+                        if (!datosGlobales[nombre]) datosGlobales[nombre] = { total: 0, recibo: 0, facturas: [] };
+                        datosGlobales[nombre].total += saldo;
+                        datosGlobales[nombre].facturas.push({ f: fila[4], p: fila[5], s: saldo });
                     }
                 }
             }
-            renderizar(resumen);
+            renderizar();
         };
         reader.readAsArrayBuffer(file);
     });
 
-    function renderizar(datos) {
+    function ajustarRecibo(cliente) {
+        const monto = prompt(`Monto del recibo para ${cliente}:`, "0");
+        if (monto !== null) {
+            datosGlobales[cliente].recibo = parseFloat(monto) || 0;
+            renderizar();
+        }
+    }
+
+    async function descargarImagen(id, nombre) {
+        const elemento = document.getElementById(id);
+        const canvas = await html2canvas(elemento);
+        const link = document.createElement('a');
+        link.download = `Saldo_${nombre}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        alert("Imagen descargada. Ahora puedes adjuntarla en WhatsApp.");
+    }
+
+    function renderizar() {
         const contenedor = document.getElementById('result');
         contenedor.innerHTML = '';
-        const nombres = Object.keys(datos).sort();
-
-        if (nombres.length === 0) {
-            contenedor.innerHTML = '<div class="empty-state">No se encontraron saldos pendientes.</div>';
-            return;
-        }
-
-        nombres.forEach(cliente => {
-            const info = datos[cliente];
-            if (info.deudaTotal <= 0) return;
+        Object.keys(datosGlobales).sort().forEach((cliente, index) => {
+            const info = datosGlobales[cliente];
+            const idComp = `comp-${index}`;
+            const totalFinal = info.total - info.recibo;
 
             const card = document.createElement('div');
-            card.className = 'card';
-            
-            let tabla = `<table><thead><tr><th>Original</th><th>Pagado</th><th>Saldo</th></tr></thead><tbody>`;
-            info.facturas.forEach(f => {
-                tabla += `<tr><td>$${f.t.toLocaleString()}</td><td>$${f.p.toLocaleString()}</td><td>$${f.s.toLocaleString()}</td></tr>`;
-            });
-            tabla += `</tbody></table>`;
-
-            const mensaje = encodeURIComponent(`Hola ${cliente}, te envío tu saldo pendiente total: $${info.deudaTotal.toLocaleString()}. ¡Saludos!`);
-
             card.innerHTML = `
-                <div class="client-name">${cliente}</div>
-                <div class="total-badge">Total Adeudado: $${info.deudaTotal.toLocaleString()}</div>
-                ${tabla}
-                <a href="https://wa.me/?text=${mensaje}" target="_blank" class="btn-whatsapp">Enviar WhatsApp</a>
+                <div id="${idComp}" class="comprobante">
+                    <div class="comp-header">
+                        <div class="comp-title">ESTADO DE CUENTA</div>
+                        <div style="font-size:0.8rem; color:gray;">Fecha: ${new Date().toLocaleDateString()}</div>
+                    </div>
+                    <div style="margin-bottom:10px;"><strong>Cliente:</strong> ${cliente}</div>
+                    <table>
+                        <thead><tr><th>Total Fact.</th><th>Pagado</th><th>Saldo</th></tr></thead>
+                        <tbody>
+                            ${info.facturas.map(f => `<tr><td>$${f.f.toLocaleString()}</td><td>$${f.p.toLocaleString()}</td><td>$${f.s.toLocaleString()}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                    ${info.recibo > 0 ? `<div style="color:green; font-size:0.8rem; margin-top:10px;">Recibo aplicado: -$${info.recibo.toLocaleString()}</div>` : ''}
+                    <div class="total-box">
+                        <div style="font-size:0.8rem; color:#64748b;">TOTAL PENDIENTE</div>
+                        <div class="total-monto">$${totalFinal.toLocaleString()}</div>
+                    </div>
+                    <div style="text-align:center; font-size:0.7rem; color:gray; margin-top:10px;">Generado automáticamente</div>
+                </div>
+                <button class="btn-recibo" onclick="ajustarRecibo('${cliente}')">⚙️ Ajustar Recibo</button>
+                <button class="btn-descargar" onclick="descargarImagen('${idComp}', '${cliente}')">💾 Descargar Foto</button>
             `;
             contenedor.appendChild(card);
         });
