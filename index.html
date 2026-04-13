@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>App de Colecciones</title>
     <style>
-        :root { --primary: #0288d1; --bg: #121212; --card: #1e1e1e; --text: #ffffff; --accent: #2e7d32; }
+        :root { --primary: #0288d1; --bg: #121212; --card: #1e1e1e; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; }
         body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         
-        #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; transition: 0.5s; }
+        #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; }
         .logo { font-size: 70px; margin-bottom: 20px; }
         
         #main-app { display: none; max-width: 500px; margin: auto; }
@@ -19,17 +19,13 @@
         
         .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 15px; }
         .nro { background: #1e1e1e; padding: 15px 0; text-align: center; border-radius: 6px; color: #ff5252; border: 1px solid #444; font-weight: bold; cursor: pointer; }
-        .nro.tengo { background: var(--accent); color: white; border-color: #fff; }
+        .nro.tengo { background: var(--accent); color: white; border-color: #fff; opacity: 0.6; }
 
-        /* Estilos de Formulario */
-        .form-group { background: #252525; padding: 20px; border-radius: 15px; border: 1px solid var(--primary); margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #111; color: white; box-sizing: border-box; }
         .btn-accion { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-share { background: var(--whatsapp); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-back { background: #444; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-bottom: 15px; }
         
-        .divider { text-align: center; margin: 20px 0; color: #666; font-size: 14px; position: relative; }
-        .divider::before { content: ""; position: absolute; left: 0; top: 50%; width: 40%; height: 1px; background: #333; }
-        .divider::after { content: ""; position: absolute; right: 0; top: 50%; width: 40%; height: 1px; background: #333; }
+        .section-title { background: #333; padding: 10px; border-radius: 5px; margin-top: 30px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #aaa; }
     </style>
 </head>
 <body>
@@ -42,7 +38,6 @@
     <div id="main-app"></div>
 
     <script>
-        // Catálogo fijo (Tus recomendaciones)
         const CATALOGO = [
             { id: "f26", nombre: "FIFA 365 2026", total: 630, tipo: "Carta", img: "https://m.media-amazon.com/images/I/71C7x6y-G9L._AC_SL1500_.jpg" },
             { id: "ca24", nombre: "Copa América 2024", total: 430, tipo: "Figurita", img: "https://exitocol.vtexassets.com/arquivos/ids/22373752/Album-Copa-America-2024-Panini.jpg" }
@@ -56,7 +51,7 @@
                 document.getElementById('splash').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 renderInicio();
-            }, 2000);
+            }, 1500);
         };
 
         function renderInicio() {
@@ -67,50 +62,39 @@
             `;
         }
 
-        function setTipo(t) {
-            tipoActual = t;
-            renderMenu();
-        }
+        function setTipo(t) { tipoActual = t; renderMenu(); }
 
         function renderMenu() {
             const filtrados = db.filter(a => a.tipo === tipoActual);
             let html = `<button class="btn-back" onclick="renderInicio()">⬅ Inicio</button>
-                        <h2>Colecciones de ${tipoActual}s</h2>
+                        <h2>${tipoActual}s</h2>
                         <button class="btn-accion" style="background:#1b5e20" onclick="renderNuevoForm()">+ AGREGAR NUEVA</button><br><br>`;
             
-            if(filtrados.length > 0) {
-                filtrados.forEach(a => {
-                    html += `
-                        <div class="album-card" onclick="verAlbum('${a.id}')">
-                            <img src="${a.img || 'https://via.placeholder.com/70?text=App'}">
-                            <div style="flex:1">
-                                <strong>${a.nombre}</strong><br>
-                                <small style="color:#888">${a.tengo.length} de ${a.total} marcadas</small>
-                            </div>
-                        </div>`;
-                });
-            } else {
-                html += `<p style="text-align:center; color:#666">No tenés ninguna cargada.</p>`;
-            }
+            filtrados.forEach(a => {
+                html += `
+                    <div class="album-card" onclick="verAlbum('${a.id}')">
+                        <img src="${a.img || 'https://via.placeholder.com/70?text=Album'}">
+                        <div style="flex:1">
+                            <strong>${a.nombre}</strong><br>
+                            <small style="color:#888">Faltan ${a.total - a.tengo.length} de ${a.total}</small>
+                        </div>
+                    </div>`;
+            });
             document.getElementById('main-app').innerHTML = html;
         }
 
         function renderNuevoForm() {
             let html = `
                 <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
-                <h2>Agregar Colección</h2>
-                
-                <div class="form-group">
-                    <h3 style="margin-top:0">A mano (Personalizada)</h3>
-                    <input type="text" id="custom-nombre" placeholder="Nombre (ej: Dragon Ball Z)">
-                    <input type="number" id="custom-total" placeholder="Cantidad total (ej: 250)">
+                <div style="background:#252525; padding:20px; border-radius:15px; border:1px solid var(--primary); margin-bottom:20px">
+                    <h3 style="margin:0 0 10px 0">Crear Manual</h3>
+                    <input type="text" id="custom-nombre" placeholder="Nombre de la colección" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px">
+                    <input type="number" id="custom-total" placeholder="Cantidad total" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px">
                     <button class="btn-accion" onclick="guardarPersonalizada()">CREAR ÁLBUM</button>
                 </div>
+                <h3 style="text-align:center; color:#666">O ELEGÍ DEL CATÁLOGO</h3>`;
 
-                <div class="divider">O ELEGÍ DEL CATÁLOGO</div>`;
-
-            const sugeridos = CATALOGO.filter(c => c.tipo === tipoActual);
-            sugeridos.forEach(c => {
+            CATALOGO.filter(c => c.tipo === tipoActual).forEach(c => {
                 html += `
                     <div class="album-card" onclick="agregarDelCatalogo('${c.id}')">
                         <img src="${c.img}">
@@ -123,45 +107,49 @@
         function guardarPersonalizada() {
             const nombre = document.getElementById('custom-nombre').value;
             const total = parseInt(document.getElementById('custom-total').value);
-            
-            if(!nombre || !total) return alert("Por favor completá nombre y cantidad");
-            
-            const nueva = {
-                id: "custom_" + Date.now(),
-                nombre: nombre,
-                total: total,
-                tipo: tipoActual,
-                img: "",
-                tengo: []
-            };
-            
-            db.push(nueva);
+            if(!nombre || !total) return alert("Completá los datos");
+            db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, img: "", tengo: [] });
             localStorage.setItem('colecciones_v4', JSON.stringify(db));
             renderMenu();
         }
 
         function agregarDelCatalogo(id) {
-            if(db.some(x => x.id === id)) return alert("Ya tenés este álbum");
-            const item = CATALOGO.find(c => c.id === id);
-            db.push({...item, tengo: []});
+            if(db.some(x => x.id === id)) return alert("Ya existe");
+            db.push({...CATALOGO.find(c => c.id === id), tengo: []});
             localStorage.setItem('colecciones_v4', JSON.stringify(db));
             renderMenu();
         }
 
         function verAlbum(id) {
             const a = db.find(x => x.id === id);
+            const faltan = [];
+            const tengo = [];
+            for(let i=1; i<=a.total; i++) {
+                if(a.tengo.includes(i)) tengo.push(i);
+                else faltan.push(i);
+            }
+
             let html = `
-                <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px">
+                <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10">
                     <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
                     <h2 style="margin:0">${a.nombre}</h2>
-                    <p style="color:#888">Tengo ${a.tengo.length} de ${a.total}</p>
+                    <p style="color:#ff5252; margin: 5px 0;"><b>Faltan: ${faltan.length}</b></p>
+                    <button class="btn-share" onclick="compartirFaltantes('${a.id}')">🟢 COMPARTIR FALTANTES</button>
                 </div>
-                <div class="grid">`;
-            for(let i=1; i<=a.total; i++) {
-                const clase = a.tengo.includes(i) ? 'tengo' : '';
-                html += `<div class="nro ${clase}" onclick="toggle('${id}', ${i})">${i}</div>`;
+
+                <div class="section-title">NÚMEROS QUE ME FALTAN</div>
+                <div class="grid">
+                    ${faltan.map(n => `<div class="nro" onclick="toggle('${id}', ${n})">${n}</div>`).join('')}
+                </div>`;
+
+            if(tengo.length > 0) {
+                html += `
+                    <div class="section-title" style="background:#1b5e20; color:white">YA LAS TENGO (${tengo.length})</div>
+                    <div class="grid" style="opacity:0.5">
+                        ${tengo.map(n => `<div class="nro tengo" onclick="toggle('${id}', ${n})">${n}</div>`).join('')}
+                    </div>`;
             }
-            html += `</div>`;
+
             document.getElementById('main-app').innerHTML = html;
             window.scrollTo(0,0);
         }
@@ -173,6 +161,15 @@
             else a.tengo.push(n);
             localStorage.setItem('colecciones_v4', JSON.stringify(db));
             verAlbum(id);
+        }
+
+        function compartirFaltantes(id) {
+            const a = db.find(x => x.id === id);
+            const faltan = [];
+            for(let i=1; i<=a.total; i++) { if(!a.tengo.includes(i)) faltan.push(i); }
+            if(faltan.length === 0) return alert("¡Álbum completo!");
+            const texto = `¡Hola! Me faltan estas de *${a.nombre}*:\n\n` + faltan.join(", ");
+            window.open("https://wa.me/?text=" + encodeURIComponent(texto), '_blank');
         }
     </script>
 </body>
