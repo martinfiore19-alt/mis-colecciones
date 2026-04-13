@@ -3,64 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Comprobantes - Cobranzas</title>
+    <title>Gestor de Cobranzas - Copiar Imagen</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --blue: #1e40af; --green: #15803d; --gray: #64748b; --bg: #f1f5f9; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
-        .container { max-width: 1000px; margin: auto; }
-        
-        .header { 
-            background: white; padding: 30px; border-radius: 15px; 
-            text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 30px; 
-        }
-        .upload-area {
-            border: 2px dashed #cbd5e1; padding: 25px; border-radius: 12px;
-            background: #f8fafc; cursor: pointer; transition: 0.3s; margin-top: 15px;
-        }
-        .upload-area:hover { border-color: var(--blue); background: #eff6ff; }
-
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 25px; }
-
-        /* Estilo del Ticket para la Imagen */
-        .ticket-wrap { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .ticket-capture { background: white; padding: 20px; border: 1px solid #e2e8f0; border-radius: 4px; }
-        .ticket-header { border-bottom: 2px solid var(--blue); margin-bottom: 15px; padding-bottom: 10px; text-align: center; }
-        .ticket-title { font-weight: 900; font-size: 1.3rem; color: var(--blue); letter-spacing: 1px; }
-        
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.85rem; }
-        th { text-align: left; background: #f1f5f9; padding: 8px; border-bottom: 1px solid #cbd5e1; }
-        td { padding: 8px; border-bottom: 1px solid #f1f5f9; }
-
-        .total-box { 
-            background: #1e293b; color: white; padding: 15px; 
-            border-radius: 6px; text-align: center; margin-top: 15px; 
-        }
-        .total-val { font-size: 1.8rem; font-weight: bold; display: block; }
-        
-        /* Botones de acción */
-        .btn { 
-            width: 100%; padding: 12px; border: none; border-radius: 8px; 
-            font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; 
-        }
+        :root { --blue: #1e40af; --green: #25d366; --bg: #f1f5f9; }
+        body { font-family: sans-serif; background: var(--bg); padding: 20px; }
+        .container { max-width: 900px; margin: auto; }
+        .header { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .upload-area { border: 2px dashed #ccc; padding: 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .ticket-wrap { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .ticket-capture { background: white; padding: 15px; border: 1px solid #eee; }
+        .ticket-header { border-bottom: 2px solid var(--blue); margin-bottom: 10px; text-align: center; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 10px 0; }
+        th, td { text-align: left; padding: 5px; border-bottom: 1px solid #f1f5f9; }
+        .total-box { background: #1e293b; color: white; padding: 10px; border-radius: 5px; text-align: center; font-size: 1.5rem; font-weight: bold; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .btn-copy { background: var(--green); color: white; }
         .btn-adj { background: #94a3b8; color: white; }
-        .btn-img { background: var(--green); color: white; font-size: 1rem; }
-        .btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>📸 Generador de Fotos de Deuda</h1>
-        <p>Procesa tu Excel (A, E, F, G) y crea imágenes para enviar por WhatsApp</p>
+        <h1>📊 Envío de Cobranzas</h1>
         <div class="upload-area" onclick="document.getElementById('upload').click()">
-            <strong>📂 Haz clic para cargar tu archivo de Excel</strong>
+            <strong>📂 Cargar Excel</strong>
             <input type="file" id="upload" accept=".xlsx, .xls" style="display:none">
         </div>
     </div>
-
     <div id="result" class="grid"></div>
 </div>
 
@@ -70,23 +43,18 @@
     document.getElementById('upload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = function(evt) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
-
             storage = {};
             for (let i = 1; i < rows.length; i++) {
                 const r = rows[i];
-                const cliente = r[0]; // A
-                const saldo = parseFloat(r[6]) || 0; // G
-
-                if (cliente && saldo > 0) {
-                    if (!storage[cliente]) storage[cliente] = { bruto: 0, desc: 0, items: [] };
-                    storage[cliente].bruto += saldo;
-                    storage[cliente].items.push({ t: r[4], p: r[5], s: saldo });
+                if (r[0] && (parseFloat(r[6]) > 0)) {
+                    if (!storage[r[0]]) storage[r[0]] = { bruto: 0, desc: 0, items: [] };
+                    storage[r[0]].bruto += parseFloat(r[6]);
+                    storage[r[0]].items.push({ t: r[4], p: r[5], s: r[6] });
                 }
             }
             render();
@@ -95,59 +63,44 @@
     });
 
     function setRecibo(name) {
-        const val = prompt(`¿Monto de recibo o pago nuevo para ${name}?`, "0");
-        if (val !== null) {
-            storage[name].desc = parseFloat(val) || 0;
-            render();
-        }
+        const val = prompt(`Monto de recibo para ${name}:`, "0");
+        if (val !== null) { storage[name].desc = parseFloat(val) || 0; render(); }
     }
 
-    async function saveImg(id, name) {
+    async function copiarImagen(id) {
         const area = document.getElementById(id);
-        const canvas = await html2canvas(area, { scale: 2, logging: false, useCORS: true });
-        const link = document.createElement('a');
-        link.download = `Saldo_${name.replace(/ /g, '_')}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
+        const canvas = await html2canvas(area);
+        canvas.toBlob(blob => {
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]).then(() => {
+                alert("¡Imagen copiada! Ahora andá a WhatsApp y pegala (Ctrl+V)");
+            });
+        });
     }
 
     function render() {
         const grid = document.getElementById('result');
         grid.innerHTML = '';
-        
         Object.keys(storage).sort().forEach((nom, i) => {
             const info = storage[nom];
-            const neto = info.bruto - info.desc;
-            const captureId = `cap-${i}`;
-
-            const card = document.createElement('div');
-            card.className = 'ticket-wrap';
-            card.innerHTML = `
-                <div id="${captureId}" class="ticket-capture">
-                    <div class="ticket-header">
-                        <div class="ticket-title">ESTADO DE CUENTA</div>
-                        <div style="font-size:0.7rem; color:gray;">FECHA: ${new Date().toLocaleDateString()}</div>
+            const capId = `cap-${i}`;
+            grid.innerHTML += `
+                <div class="ticket-wrap">
+                    <div id="${capId}" class="ticket-capture">
+                        <div class="ticket-header">RESUMEN DE CUENTA</div>
+                        <div style="font-size:0.8rem"><strong>Cliente:</strong> ${nom}</div>
+                        <table>
+                            <tr><th>Fact.</th><th>Pago</th><th>Saldo</th></tr>
+                            ${info.items.map(item => `<tr><td>$${item.t}</td><td>$${item.p}</td><td>$${item.s}</td></tr>`).join('')}
+                        </table>
+                        ${info.desc > 0 ? `<div style="color:red; font-size:0.7rem; text-align:right">Recibo: -$${info.desc}</div>` : ''}
+                        <div class="total-box">$${(info.bruto - info.desc).toLocaleString()}</div>
                     </div>
-                    <div style="font-size:0.9rem; margin-bottom:10px;"><strong>CLIENTE:</strong> ${nom}</div>
-                    <table>
-                        <thead><tr><th>Factura</th><th>Pago</th><th>Saldo</th></tr></thead>
-                        <tbody>
-                            ${info.items.map(item => `<tr><td>$${item.t.toLocaleString()}</td><td>$${item.p.toLocaleString()}</td><td>$${item.s.toLocaleString()}</td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                    ${info.desc > 0 ? `<div style="text-align:right; color:red; font-size:0.8rem; font-weight:bold;">Recibo: -$${info.desc.toLocaleString()}</div>` : ''}
-                    <div class="total-box">
-                        <span style="font-size:0.7rem; opacity:0.8;">SALDO FINAL A PAGAR</span>
-                        <span class="total-val">$${neto.toLocaleString()}</span>
-                    </div>
-                </div>
-                <button class="btn btn-adj" onclick="setRecibo('${nom}')">✏️ Ajustar Recibo</button>
-                <button class="btn btn-img" onclick="saveImg('${captureId}', '${nom}')">📸 Guardar Foto</button>
-            `;
-            grid.appendChild(card);
+                    <button class="btn btn-adj" onclick="setRecibo('${nom}')">✏️ Ajustar Recibo</button>
+                    <button class="btn btn-copy" onclick="copiarImagen('${capId}')">📋 COPIAR PARA PEGAR EN WS</button>
+                </div>`;
         });
     }
 </script>
-
 </body>
 </html>
