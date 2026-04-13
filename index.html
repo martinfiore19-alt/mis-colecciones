@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="es"><!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -20,17 +19,17 @@
         #splash { 
             position: fixed; inset: 0; background: #000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 99999; opacity: 1; transition: opacity 0.8s ease; 
+            z-index: 99999; opacity: 1; transition: opacity 0.5s ease; 
         }
-        .logo-container { position: relative; width: 300px; height: 300px; display: flex; justify-content: center; align-items: center; }
+        .logo-container { position: relative; width: 260px; height: 260px; display: flex; justify-content: center; align-items: center; }
         .logo-glow {
-            position: absolute; inset: -15px; border-radius: 50%;
+            position: absolute; inset: -10px; border-radius: 50%;
             background: conic-gradient(transparent, var(--accent), transparent 40%);
             animation: girar 2s linear infinite;
-            filter: blur(12px);
+            filter: blur(10px);
         }
-        .logo-img { width: 280px; height: 280px; border-radius: 50%; object-fit: cover; border: 4px solid #000; z-index: 10; }
-        .splash-title { margin-top: 40px; color: white; font-weight: bold; letter-spacing: 3px; font-size: 18px; text-shadow: 0 0 20px var(--accent); text-align: center; text-transform: uppercase; padding: 0 10px; }
+        .logo-img { width: 240px; height: 240px; border-radius: 50%; object-fit: cover; border: 4px solid #000; z-index: 10; }
+        .splash-title { margin-top: 30px; color: white; font-weight: bold; letter-spacing: 3px; font-size: 16px; text-shadow: 0 0 15px var(--accent); text-align: center; text-transform: uppercase; }
         @keyframes girar { 100% { transform: rotate(360deg); } }
 
         #login-screen { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 99998; padding: 20px; text-align: center; }
@@ -90,7 +89,7 @@
         let userName = localStorage.getItem('lta_user_name_v3') || "";
         let currentId = null;
         let tipoActual = "";
-        let vistaActual = "inicio"; // Control de navegación
+        let vistaActual = "inicio";
         let deferredPrompt;
 
         // Catálogos
@@ -100,10 +99,9 @@
         const CATALOGO_CARTAS = RAW_CARTAS.map(i => ({n: i.n.toUpperCase(), t: i.t})).sort((a,b) => a.n.localeCompare(b.n));
         const CATALOGO_FIGUS = RAW_FIGUS.map(i => ({n: i.n.toUpperCase(), t: i.t})).sort((a,b) => a.n.localeCompare(b.n));
 
-        // --- LÓGICA DE NAVEGACIÓN (BOTÓN ATRÁS) ---
+        // --- NAVEGACIÓN ---
         window.onpopstate = function(event) {
-            if (vistaActual === "album") renderMenu();
-            else if (vistaActual === "form") renderMenu();
+            if (vistaActual === "album" || vistaActual === "form") renderMenu();
             else if (vistaActual === "menu") renderInicio();
         };
 
@@ -112,19 +110,21 @@
             history.pushState({view: state}, "");
         }
 
-        // Splash
+        // --- MANEJO DEL SPLASH (FIJO) ---
         function closeSplash() {
             const s = document.getElementById('splash');
-            if (s && s.style.display !== 'none') {
+            if (s) {
                 s.style.opacity = '0';
                 setTimeout(() => {
                     s.style.display = 'none';
                     if (!userName) document.getElementById('login-screen').style.display = 'flex';
                     else showApp();
-                }, 800);
+                }, 500);
             }
         }
-        window.onload = () => setTimeout(closeSplash, 2000);
+
+        // Ejecutar cierre
+        setTimeout(closeSplash, 2000); 
 
         function saveUserName() {
             const val = document.getElementById('user-input-name').value.trim().toUpperCase();
@@ -235,7 +235,7 @@
             if (item) {
                 db.push({ id: 'a'+Date.now(), nombre: item.n, total: item.t, tipo: tipoActual, tengo: [], repes: [], img: "" });
                 localStorage.setItem(DB_NAME, JSON.stringify(db));
-                history.back(); // Vuelve al menú automáticamente
+                history.back();
             }
         }
 
@@ -276,6 +276,14 @@
             document.getElementById('val-faltan').innerText = a.total - a.tengo.length;
             document.getElementById('val-repes').innerText = a.repes.length;
             localStorage.setItem(DB_NAME, JSON.stringify(db));
+        }
+
+        function setDynamicColor(nombre) {
+            let color = "#2196F3"; 
+            const n = nombre.toUpperCase();
+            if (n.includes("MUNDIAL") || n.includes("WORLD CUP") || n.includes("QATAR")) color = "#FFD700"; 
+            else if (n.includes("ARGENTINO") || n.includes("AMÉRICA")) color = "#4CAF50"; 
+            document.documentElement.style.setProperty('--accent', color);
         }
 
         function pedirFoto(e, id) { e.stopPropagation(); currentId = id; document.getElementById('photoInput').click(); }
@@ -321,123 +329,7 @@
                 renderMenu(); 
             } 
         }
-    </script>
-</body>
-</html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LA TABERNA DE LOS ÁLBUMES</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <style>
-        :root { 
-            --bg: #000000; --card: #161616; --text: #ffffff; 
-            --accent: #2196F3; --whatsapp: #25d366; --gold: #FFD700;
-        }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; transition: 0.3s; overflow-x: hidden; }
-        
-        #splash { 
-            position: fixed; inset: 0; background: #000; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            z-index: 99999; opacity: 1; transition: opacity 0.8s ease; 
-        }
-        .logo-container { position: relative; width: 300px; height: 300px; display: flex; justify-content: center; align-items: center; }
-        .logo-glow {
-            position: absolute; inset: -15px; border-radius: 50%;
-            background: conic-gradient(transparent, var(--accent), transparent 40%);
-            animation: girar 2s linear infinite;
-            filter: blur(12px);
-        }
-        .logo-img { width: 280px; height: 280px; border-radius: 50%; object-fit: cover; border: 4px solid #000; z-index: 10; }
-        .splash-title { margin-top: 40px; color: white; font-weight: bold; letter-spacing: 3px; font-size: 18px; text-shadow: 0 0 20px var(--accent); text-align: center; text-transform: uppercase; padding: 0 10px; }
-        @keyframes girar { 100% { transform: rotate(360deg); } }
 
-        #login-screen { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 99998; padding: 20px; text-align: center; }
-        #main-app { display: none; max-width: 500px; margin: auto; padding-bottom: 40px; }
-        
-        .btn-tipo { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
-        .album-card { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #222; cursor: pointer; position: relative; }
-        .photo-edit { width: 60px; height: 60px; border-radius: 8px; border: 1px solid #333; background: #111; overflow: hidden; }
-        
-        .prog-container { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 8px; overflow: hidden; }
-        .prog-fill { height: 100%; background: var(--accent); transition: width 0.5s; }
-        
-        .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 15px; }
-        .nro { background: #1a1a1a; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: #555; border: 1px solid #222; font-weight: bold; font-size: 12px; cursor: pointer; }
-        .nro.tengo { background: var(--accent); color: white; border-color: #fff; }
-        .nro.repe { background: var(--gold); color: black; border-color: #fff; }
-        
-        .stat-box { display: flex; justify-content: space-around; background: #111; padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 12px; border: 1px solid #222; }
-        .stat-val { color: var(--accent); font-weight: bold; display: block; font-size: 16px; }
-
-        input, select { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; font-size: 16px; }
-        .btn-accion { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .btn-back { background: #222; color: #fff; border: none; padding: 8px 12px; border-radius: 5px; margin-bottom: 10px; cursor: pointer; }
-        
-        #install-banner { display: none; background: var(--accent); color: white; position: fixed; bottom: 20px; left: 20px; right: 20px; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold; z-index: 1000; }
-        .hide-tengo .nro.tengo { display: none; }
-    </style>
-</head>
-<body>
-
-    <div id="splash">
-        <div class="logo-container">
-            <div class="logo-glow" id="splash-glow"></div>
-            <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" class="logo-img">
-        </div>
-        <div class="splash-title">LA TABERNA DE LOS ÁLBUMES</div>
-    </div>
-
-    <div id="install-banner" onclick="installApp()">📲 INSTALAR ACCESO DIRECTO</div>
-
-    <div id="login-screen">
-        <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" style="width:80px; border-radius:50%; margin-bottom:15px; border: 2px solid var(--accent);">
-        <h3>¿CÓMO TE LLAMÁS?</h3>
-        <input type="text" id="user-input-name" placeholder="ESCRIBÍ TU NOMBRE...">
-        <button class="btn-accion" onclick="saveUserName()">CONTINUAR</button>
-    </div>
-
-    <div id="main-app"></div>
-
-    <input type="file" id="photoInput" style="display:none" accept="image/*" onchange="handleFileSelect(event)">
-
-    <script>
-        const DB_NAME = 'lta_pro_v1';
-        const LOGO_URL = "https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png";
-        
-        let db = JSON.parse(localStorage.getItem(DB_NAME)) || [];
-        let userName = localStorage.getItem('lta_user_name_v3') || "";
-        let currentId = null;
-        let tipoActual = "";
-        let deferredPrompt;
-
-        // Catálogos
-        const RAW_CARTAS = [{ n: "Copa Mundial de la FIFA 2026 Adrenalyn XL", t: 630 }, { n: "FIFA 365: 2025-2026 Adrenalyn XL", t: 450 }, { n: "Copa Mundial de Clubes de la FIFA 2025. Adrenalyn XL", t: 387 }, { n: "FIFA 365 2024-2025 Adrenalyn XL", t: 441 }, { n: "Fútbol Argentino 2024 Adrenalyn XL", t: 538 }, { n: "FIFA 365 2023-2024 Adrenalyn XL", t: 441 }, { n: "Copa Mundial Femenina de la FIFA 2023. Adrenalyn XL", t: 375 }, { n: "Fútbol Argentino 2023. Adrenalyn XL", t: 536 }, { n: "FIFA 365: 2022-2023. Adrenalyn XL", t: 441 }, { n: "Clase Top 2021-2022. Adrenalyn XL", t: 438 }, { n: "Copa Mundial de la FIFA Qatar 2022. Adrenalyn XL", t: 495 }, { n: "Camino a la Copa Mundial de la FIFA Qatar 2022. Adrenalyn XL", t: 494 }, { n: "Fútbol Argentino 2021. Adrenalyn XL", t: 501 }, { n: "FIFA 365: 2020-2021. Adrenalyn XL", t: 398 }, { n: "Previa de la UEFA Euro 2020. Adrenalyn XL", t: 709 }, { n: "Fútbol Argentino 2020. Adrenalyn XL", t: 173 }, { n: "FIFA 365: 2019-2020. Adrenalyn XL", t: 550 }, { n: "FIFA 365: 2018-2019. Adrenalyn XL", t: 396 }, { n: "Copa Mundial de la FIFA Rusia 2018. Adrenalyn XL", t: 622 }, { n: "FIFA 365: 2017-2018. Adrenalyn XL", t: 573 }, { n: "Camino a la Copa Mundial de la FIFA Rusia 2018. Adrenalyn XL", t: 608 }, { n: "Fútbol Argentino 2017. Adrenalyn XL", t: 307 }, { n: "FIFA 365: 2016-2017. Adrenalyn XL", t: 703 }, { n: "Copa América Centenario. Estados Unidos 2016. Adrenalyn XL", t: 315 }, { n: "FIFA 365: 2015-2016. Adrenalyn XL", t: 491 }, { n: "Copa América. Chile 2015. Adrenalyn XL", t: 245 }, { n: "Copa Mundial de la FIFA Brasil 2014. Adrenalyn XL", t: 678 }, { n: "Liga de Campeones de la UEFA 2013-2014. Adrenalyn XL", t: 450 }, { n: "Camino a la Copa Mundial de la FIFA Brasil 2014. Adrenalyn XL", t: 278 }, { n: "Fútbol Argentino 2013. Adrenalyn XL", t: 350 }, { n: "Liga de Campeones de la UEFA 2012-2013. Adrenalyn XL", t: 555 }, { n: "Fútbol Argentino 2012. Adrenalyn XL", t: 350 }, { n: "Liga de Campeones de la UEFA 2011-2012. Adrenalyn XL", t: 412 }, { n: "Liga de Campeones de la UEFA 2010-2011. Adrenalyn XL", t: 500 }, { n: "Copa Mundial de la FIFA Sudáfrica 2010. Adrenalyn XL", t: 350 }, { n: "CONMEBOL: Libertadores y Sudamericana 2024. Adrenalyn XL", t: 383 }];
-        const RAW_FIGUS = [{ n: "Liga de Campeones de la UEFA 2025-2026", t: 574 }, { n: "FIFA 365 2026", t: 660 }, { n: "UEFA Euro 2024", t: 1428 }, { n: "Copa Mundial de Clubes de la FIFA 2025", t: 558 }, { n: "UEFA Euro Francia 2016", t: 680 }, { n: "Fútbol Argentino 2025", t: 567 }, { n: "Fútbol Argentino 2024", t: 508 }, { n: "Fútbol Argentino 2023", t: 522 }, { n: "Fútbol Argentino 2022", t: 519 }, { n: "Fútbol Argentino 2021", t: 481 }, { n: "Fútbol Argentino 2019-2020", t: 452 }, { n: "Fútbol Argentino 2018-2019", t: 392 }, { n: "Fútbol Argentino 2017-2018", t: 521 }, { n: "Fútbol Argentino 2016", t: 660 }, { n: "Fútbol Argentino 2015", t: 660 }, { n: "Fútbol Argentino 2014", t: 490 }, { n: "Fútbol Argentino 2013-2014", t: 504 }, { n: "Torneo Inicial Argentina 2012-2013", t: 440 }, { n: "Fútbol Argentino 2011", t: 450 }, { n: "Futbol Argentino Apertura 2010", t: 376 }, { n: "Futbol Argentino Apertura 2009", t: 563 }, { n: "Futbol Argentino Clausura 2008", t: 382 }, { n: "Futbol Argentino Apertura 2008", t: 640 }, { n: "Futbol Argentino Apertura 2006", t: 300 }, { n: "Copa Mundial de la FIFA Qatar 2022", t: 842 }, { n: "Copa Mundial de la FIFA Rusia 2018", t: 844 }, { n: "Copa Mundial de la FIFA Brasil 2014", t: 782 }, { n: "Copa Mundial FIFA Women's World Cup France 2019", t: 510 }, { n: "Copa Mundial FIFA World Cup South Africa 2010", t: 806 }, { n: "Copa Mundial FIFA World Cup Germany 2006", t: 605 }, { n: "Copa Mundial FIFA World Cup Korea/Japan 2002", t: 581 }, { n: "Copa Mundial FIFA World Cup France 1998", t: 561 }, { n: "Copa Mundial FIFA World Cup USA 1994", t: 444 }, { n: "Copa Mundial World Cup USA 1994 (Upper Deck)", t: 300 }, { n: "Copa Mundial FIFA World Cup Italia 1990", t: 448 }, { n: "Copa Mundial FIFA World Cup Mexico 1986", t: 427 }, { n: "Copa Mundial FIFA World Cup España 1982", t: 427 }, { n: "Copa Mundial FIFA World Cup Argentina 1978", t: 400 }, { n: "Copa Mundial FIFA World Cup München 1974", t: 400 }, { n: "Copa Mundial FIFA World Cup Mexico 1970", t: 288 }, { n: "Road to FIFA World Cup Qatar 2022", t: 600 }, { n: "Road to 2018 FIFA World Cup Russia", t: 480 }, { n: "Road to 2014 FIFA World Cup Brazil", t: 428 }, { n: "Road to the FIFA World Cup 2002", t: 150 }, { n: "World Cup Story", t: 262 }, { n: "CONMEBOL Copa América 2024", t: 494 }, { n: "CONMEBOL Copa América 2021", t: 369 }, { n: "CONMEBOL Copa América 2021 Preview", t: 400 }, { n: "CONMEBOL Copa América Brasil 2019", t: 400 }, { n: "CONMEBOL Copa América Centenario. USA 2016", t: 452 }, { n: "CONMEBOL Copa América. Chile 2015", t: 398 }, { n: "CONMEBOL Copa América. Argentina 2011", t: 371 }, { n: "CONMEBOL Copa América. Venezuela 2007", t: 300 }, { n: "CONMEBOL Copa América. Colombia 2001", t: 153 }];
-
-        const CATALOGO_CARTAS = RAW_CARTAS.map(i => ({n: i.n.toUpperCase(), t: i.t})).sort((a,b) => a.n.localeCompare(b.n));
-        const CATALOGO_FIGUS = RAW_FIGUS.map(i => ({n: i.n.toUpperCase(), t: i.t})).sort((a,b) => a.n.localeCompare(b.n));
-
-        // Splash
-        function closeSplash() {
-            const s = document.getElementById('splash');
-            if (s && s.style.display !== 'none') {
-                s.style.opacity = '0';
-                setTimeout(() => {
-                    s.style.display = 'none';
-                    if (!userName) document.getElementById('login-screen').style.display = 'flex';
-                    else showApp();
-                }, 800);
-            }
-        }
-        window.onload = () => setTimeout(closeSplash, 2500);
-        setTimeout(closeSplash, 4000);
-
-        // PWA Install
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); deferredPrompt = e;
             document.getElementById('install-banner').style.display = 'block';
@@ -449,235 +341,6 @@
                 if (outcome === 'accepted') document.getElementById('install-banner').style.display = 'none';
                 deferredPrompt = null;
             }
-        }
-
-        function setDynamicColor(nombre) {
-            let color = "#2196F3"; 
-            const n = nombre.toUpperCase();
-            if (n.includes("MUNDIAL") || n.includes("WORLD CUP") || n.includes("QATAR")) color = "#FFD700"; 
-            else if (n.includes("ARGENTINO") || n.includes("AMÉRICA")) color = "#4CAF50"; 
-            document.documentElement.style.setProperty('--accent', color);
-        }
-
-        function saveUserName() {
-            const val = document.getElementById('user-input-name').value.trim().toUpperCase();
-            if (val.length < 2) return alert("NOMBRE MUY CORTO");
-            userName = val;
-            localStorage.setItem('lta_user_name_v3', userName);
-            document.getElementById('login-screen').style.display = 'none';
-            showApp();
-        }
-
-        function showApp() { 
-            document.getElementById('main-app').style.display = 'block'; 
-            renderInicio(); 
-        }
-
-        function renderInicio() {
-            setDynamicColor("DEFAULT");
-            document.getElementById('main-app').innerHTML = `
-                <div style="text-align:center; padding: 20px 0;">
-                    <img src="${LOGO_URL}" style="width:70px; border-radius:50%; border:2px solid var(--accent);">
-                    <h2 style="margin-top:10px">HOLA, ${userName}</h2>
-                </div>
-                <div class="btn-tipo" onclick="setTipo('Carta')">🃏 CARTAS</div>
-                <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ FIGURITAS</div>
-                <div style="display:flex; justify-content:space-between; margin-top:20px;">
-                    <button class="btn-back" style="width:48%;" onclick="exportDB()">⬇ COPIA</button>
-                    <button class="btn-back" style="width:48%;" onclick="document.getElementById('importInput').click()">⬆ SUBIR</button>
-                    <input type="file" id="importInput" style="display:none" onchange="importDB(event)">
-                </div>`;
-        }
-
-        function setTipo(t) { 
-            tipoActual = t; 
-            renderMenu(); 
-        }
-
-        function renderMenu() {
-            setDynamicColor("DEFAULT");
-            const filtrados = db.filter(a => a.tipo === tipoActual);
-            let html = `<button class="btn-back" onclick="renderInicio()">⬅ ATRÁS</button>
-                        <h3 style="color:var(--accent)">MIS ${tipoActual.toUpperCase()}S</h3>
-                        <button class="btn-accion" onclick="renderNuevoForm()">+ AGREGAR CATÁLOGO</button><br><br>`;
-            
-            if (filtrados.length === 0) {
-                html += `<p style="text-align:center; color:#666;">NO TENÉS NADA CARGADO TODAVÍA.</p>`;
-            }
-
-            filtrados.forEach(a => {
-                const porc = Math.floor(((a.tengo ? a.tengo.length : 0) / a.total) * 100);
-                html += `
-                    <div class="album-card" onclick="verAlbum('${a.id}')">
-                        <div class="photo-edit" onclick="pedirFoto(event, '${a.id}')">
-                            <img src="${a.img || LOGO_URL}" style="width:100%; height:100%; object-fit:cover;">
-                        </div>
-                        <div style="flex:1">
-                            <strong style="font-size:12px">${a.nombre}</strong><br>
-                            <small>${porc}% - ${(a.tengo ? a.tengo.length : 0)}/${a.total}</small>
-                            <div class="prog-container"><div class="prog-fill" style="width:${porc}%"></div></div>
-                        </div>
-                        <div style="padding:10px; color:#ff4444;" onclick="eliminarAlbum(event, '${a.id}')">✖</div>
-                    </div>`;
-            });
-            document.getElementById('main-app').innerHTML = html;
-        }
-
-        function renderNuevoForm() {
-            document.getElementById('main-app').innerHTML = `
-                <button class="btn-back" onclick="renderMenu()">⬅ CANCELAR</button>
-                <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #333">
-                    <input type="text" id="search-cat" placeholder="🔎 BUSCAR..." onkeyup="filterSelect()">
-                    <select id="select-catalogo" size="8"></select>
-                    
-                    <div id="manual-form" style="display:none; margin-top:15px; border-top:1px solid #333; padding-top:15px;">
-                        <input type="text" id="manual-name" placeholder="NOMBRE DE LA COLECCIÓN">
-                        <input type="number" id="manual-total" placeholder="CANTIDAD TOTAL (EJ: 500)">
-                    </div>
-
-                    <button class="btn-accion" style="margin-top:15px" id="btn-save" onclick="guardarColeccion()">AGREGAR SELECCIONADO</button>
-                </div>`;
-            filterSelect();
-        }
-
-        function filterSelect() {
-            const s = document.getElementById('search-cat').value.toUpperCase();
-            const sel = document.getElementById('select-catalogo');
-            const cat = tipoActual === 'Carta' ? CATALOGO_CARTAS : CATALOGO_FIGUS;
-            
-            let options = `<option value="MANUAL">✨ + AGREGAR OTRO (PERSONALIZADO)</option>`;
-            options += cat.filter(i => i.n.includes(s))
-                .map((item, idx) => `<option value="${idx}">${item.n}</option>`).join('');
-            
-            sel.innerHTML = options;
-            sel.onchange = () => {
-                const isManual = sel.value === "MANUAL";
-                document.getElementById('manual-form').style.display = isManual ? 'block' : 'none';
-                document.getElementById('btn-save').innerText = isManual ? 'GUARDAR PERSONALIZADO' : 'AGREGAR SELECCIONADO';
-            };
-        }
-
-        function guardarColeccion() {
-            const sel = document.getElementById('select-catalogo');
-            let item = null;
-
-            if (sel.value === "MANUAL") {
-                const n = document.getElementById('manual-name').value.trim().toUpperCase();
-                const t = parseInt(document.getElementById('manual-total').value);
-                if (!n || isNaN(t) || t <= 0) return alert("COMPLETÁ NOMBRE Y CANTIDAD");
-                item = { n, t };
-            } else {
-                const s = document.getElementById('search-cat').value.toUpperCase();
-                const cat = tipoActual === 'Carta' ? CATALOGO_CARTAS : CATALOGO_FIGUS;
-                const filtrados = cat.filter(i => i.n.includes(s));
-                item = filtrados[sel.selectedIndex - 1]; 
-            }
-
-            if (!item) return;
-            db.push({ id: 'a'+Date.now(), nombre: item.n, total: item.t, tipo: tipoActual, tengo: [], repes: [], img: "" });
-            localStorage.setItem(DB_NAME, JSON.stringify(db));
-            renderMenu();
-        }
-
-        function verAlbum(id) {
-            currentId = id; const a = db.find(x => x.id === id); 
-            setDynamicColor(a.nombre);
-            let html = `
-                <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10;">
-                    <button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
-                    <h3 style="margin:5px 0; font-size:14px; color:var(--accent)">${a.nombre}</h3>
-                    <div class="stat-box">
-                        <div>FALTAN<span class="stat-val" id="val-faltan">${a.total - (a.tengo ? a.tengo.length : 0)}</span></div>
-                        <div>REPES<span class="stat-val" id="val-repes" style="color:var(--gold)">${a.repes ? a.repes.length : 0}</span></div>
-                        <div onclick="toggleFaltantes()" style="cursor:pointer; border-left:1px solid #333; padding-left:10px;">
-                            <span id="txt-filtro">👁 VER TODO</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid" id="grid-numeros">`;
-            for(let i=1; i<=a.total; i++) {
-                let cl = (a.repes && a.repes.includes(i)) ? "tengo repe" : (a.tengo && a.tengo.includes(i) ? "tengo" : "");
-                html += `<div class="nro ${cl}" id="n-${i}" onclick="ciclo('${id}', ${i})">${i}</div>`;
-            }
-            html += `</div><button class="btn-accion" style="margin-top:20px; background:var(--whatsapp)" onclick="compartir('${id}')">📲 WHATSAPP</button>`;
-            document.getElementById('main-app').innerHTML = html;
-        }
-
-        function toggleFaltantes() {
-            const g = document.getElementById('grid-numeros');
-            const t = document.getElementById('txt-filtro');
-            g.classList.toggle('hide-tengo');
-            t.innerText = g.classList.contains('hide-tengo') ? "🚫 OCULTAR TENGO" : "👁 VER TODO";
-        }
-
-        function ciclo(id, n) {
-            const a = db.find(x => x.id === id); 
-            const el = document.getElementById(`n-${n}`);
-            if (!a.tengo) a.tengo = [];
-            if (!a.repes) a.repes = [];
-            
-            if (!a.tengo.includes(n)) { 
-                a.tengo.push(n); 
-                el.classList.add('tengo'); 
-            } else if (!a.repes.includes(n)) { 
-                a.repes.push(n); 
-                el.classList.add('repe'); 
-            } else { 
-                a.tengo = a.tengo.filter(x => x !== n); 
-                a.repes = a.repes.filter(x => x !== n); 
-                el.classList.remove('tengo', 'repe'); 
-            }
-            document.getElementById('val-faltan').innerText = a.total - a.tengo.length;
-            document.getElementById('val-repes').innerText = a.repes.length;
-            localStorage.setItem(DB_NAME, JSON.stringify(db));
-        }
-
-        function pedirFoto(e, id) { e.stopPropagation(); currentId = id; document.getElementById('photoInput').click(); }
-        
-        function handleFileSelect(e) {
-            const r = new FileReader();
-            r.onload = (ev) => { 
-                const target = db.find(x => x.id === currentId);
-                if (target) target.img = ev.target.result; 
-                localStorage.setItem(DB_NAME, JSON.stringify(db)); 
-                renderMenu(); 
-            };
-            r.readAsDataURL(e.target.files[0]);
-        }
-
-        function compartir(id) {
-            const a = db.find(x => x.id === id);
-            const f = []; for(let i=1; i<=a.total; i++) if(!a.tengo.includes(i)) f.push(i);
-            const m = `*LA TABERNA*\n*Colección:* ${a.nombre}\n❌ *FALTAN:* ${f.length > 50 ? f.length + ' números' : f.join(", ")}\n🔄 *REPES:* ${a.repes ? a.repes.join(", ") : ""}`;
-            window.open("https://wa.me/?text=" + encodeURIComponent(m));
-        }
-
-        function exportDB() {
-            const b = new Blob([JSON.stringify({db, userName})], {type: "application/json"});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `taberna_backup.json`; a.click();
-        }
-
-        function importDB(e) {
-            const r = new FileReader();
-            r.onload = (ev) => { 
-                try {
-                    const d = JSON.parse(ev.target.result); 
-                    db = d.db || []; userName = d.userName || ""; 
-                    localStorage.setItem(DB_NAME, JSON.stringify(db)); 
-                    localStorage.setItem('lta_user_name_v3', userName); 
-                    location.reload(); 
-                } catch(e) { alert("ERROR AL SUBIR ARCHIVO"); }
-            };
-            r.readAsText(e.target.files[0]);
-        }
-
-        function eliminarAlbum(e, id) { 
-            e.stopPropagation(); 
-            if(confirm("¿ELIMINAR ESTA COLECCIÓN?")) { 
-                db = db.filter(x => x.id !== id); 
-                localStorage.setItem(DB_NAME, JSON.stringify(db)); 
-                renderMenu(); 
-            } 
         }
     </script>
 </body>
