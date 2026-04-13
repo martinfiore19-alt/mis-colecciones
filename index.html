@@ -5,83 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Taberna de los Álbumes - L.T.A.</title>
     <style>
-        :root { --primary: #0288d1; --bg: #121212; --card: #1e1e1e; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        :root { --primary: #ffffff; --bg: #000000; --card: #1a1a1a; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; --red: #ff5252; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         
-        /* SPLASH SCREEN CON LOGO (MARADONA) */
+        /* PANTALLA DE INICIO (LOGO MARADONA) */
         #splash { 
-            position: fixed; 
-            inset: 0; 
-            background: #000; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 99999; 
-            transition: opacity 0.8s;
+            position: fixed; inset: 0; background: #000; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            z-index: 99999; transition: opacity 0.8s;
         }
         .logo-img { 
-            width: 80%; /* Ocupa el 80% del ancho de la pantalla */
-            max-width: 350px; /* Tamaño máximo para tablets */
-            border-radius: 50%; /* Hace el logo circular si la imagen no lo es */
-            border: 4px solid var(--primary); /* Borde decorativo azul */
-            animation: pulse 2.5s infinite; /* Efecto de pulso */
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0px rgba(2, 136, 209, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(2, 136, 209, 0); }
-            100% { box-shadow: 0 0 0 0px rgba(2, 136, 209, 0); }
+            width: 85%; max-width: 320px; 
+            border-radius: 50%; border: 2px solid #333;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
         }
 
         #main-app { display: none; max-width: 500px; margin: auto; }
-        .btn-tipo { background: var(--card); padding: 30px 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
         
-        .album-card { background: var(--card); padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; cursor: pointer; }
-        .album-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #222; }
+        /* DISEÑO DE TARJETAS */
+        .btn-tipo { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
+        .album-card { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; cursor: pointer; }
+        .album-card img { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; background: #222; }
         
-        .prog-container { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 5px; overflow: hidden; }
-        .prog-fill { height: 100%; background: var(--primary); transition: width 0.5s; }
+        /* BARRAS Y GRILLA */
+        .prog-container { width: 100%; height: 5px; background: #333; border-radius: 3px; margin-top: 6px; overflow: hidden; }
+        .prog-fill { height: 100%; background: var(--accent); transition: width 0.5s; }
 
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
         .nro { 
-            background: #1e1e1e; 
-            padding: 10px 0; 
-            text-align: center; 
-            border-radius: 4px; 
-            color: #ff5252; 
-            border: 1px solid #333; 
-            font-weight: bold; 
-            font-size: 11px; 
-            cursor: pointer; 
-            transition: all 0.2s;
+            background: #1a1a1a; padding: 12px 0; text-align: center; border-radius: 4px; 
+            color: var(--red); border: 1px solid #333; font-weight: bold; font-size: 11px; 
+            cursor: pointer; transition: background 0.2s;
         }
         .nro.tengo { background: var(--accent) !important; color: white !important; border-color: #fff !important; }
 
-        .btn-accion { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-share { background: var(--whatsapp); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
-        .btn-back { background: #444; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; font-size: 13px; }
+        /* BOTONES */
+        .btn-accion { background: #333; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; border: 1px solid #444; }
+        .btn-share { background: var(--whatsapp); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
+        .btn-back { background: #222; color: #aaa; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div id="splash">
-        <img src="https://lh3.googleusercontent.com/pw/AIL4fc-bFjM5eX4x_R_e_E4d0U6mC5y9M-Rj_j_oA_M_M=w600-h600-no" class="logo-img" alt="Logo L.T.A.">
-        <p style="margin-top:20px; color:#aaa">Cargando la Taberna...</p>
+        <img src="https://github.com/martinfiore19-alt/mis-colecciones/blob/main/logo.png?raw=true" class="logo-img">
+        <p style="margin-top:30px; color:#555; letter-spacing: 2px; font-size: 12px;">LA TABERNA DE LOS ÁLBUMES</p>
     </div>
 
     <div id="main-app"></div>
 
     <script>
-        // Catálogo fijo (Tus recomendaciones)
         const CATALOGO = [
             { id: "f26", nombre: "FIFA 365 2026", total: 630, tipo: "Carta", img: "https://m.media-amazon.com/images/I/71C7x6y-G9L._AC_SL1500_.jpg" },
             { id: "ca24", nombre: "Copa América 2024", total: 430, tipo: "Figurita", img: "https://exitocol.vtexassets.com/arquivos/ids/22373752/Album-Copa-America-2024-Panini.jpg" }
         ];
 
-        let db = JSON.parse(localStorage.getItem('colecciones_v8')) || [];
+        let db = JSON.parse(localStorage.getItem('colecciones_v9')) || [];
         let tipoActual = "";
 
-        // Tiempo de Splash extendido para que el logo se luzca (3 segundos)
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('splash').style.opacity = '0';
@@ -90,14 +71,17 @@
                     document.getElementById('main-app').style.display = 'block';
                     renderInicio();
                 }, 800);
-            }, 3000);
+            }, 2500);
         };
 
         function renderInicio() {
             document.getElementById('main-app').innerHTML = `
-                <h2 style="text-align:center; margin-top:30px">La Taberna de los Álbumes</h2>
-                <div class="btn-tipo" onclick="setTipo('Carta')">🃏 CARTAS</div>
-                <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ FIGURITAS</div>
+                <div style="text-align:center; margin: 30px 0;">
+                    <img src="https://github.com/martinfiore19-alt/mis-colecciones/blob/main/logo.png?raw=true" style="width:80px; border-radius:50%">
+                    <h2 style="margin-top:10px">¡Bienvenido, Martín!</h2>
+                </div>
+                <div class="btn-tipo" onclick="setTipo('Carta')">🃏 MIS CARTAS</div>
+                <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ MIS FIGURITAS</div>
             `;
         }
 
@@ -106,8 +90,8 @@
         function renderMenu() {
             const filtrados = db.filter(a => a.tipo === tipoActual);
             let html = `<button class="btn-back" onclick="renderInicio()">⬅ Volver</button>
-                        <h3 style="margin: 10px 0;">Mis ${tipoActual}s</h3>
-                        <button class="btn-accion" style="background:#1b5e20; padding:10px;" onclick="renderNuevoForm()">+ AGREGAR NUEVA</button><br><br>`;
+                        <h3 style="margin: 5px 0 15px 0;">Sección ${tipoActual}s</h3>
+                        <button class="btn-accion" style="background:#1b5e20" onclick="renderNuevoForm()">+ AGREGAR NUEVA</button><br><br>`;
             
             filtrados.forEach(a => {
                 const totalTengo = a.tengo.length;
@@ -116,10 +100,10 @@
 
                 html += `
                     <div class="album-card" onclick="verAlbum('${a.id}')">
-                        <img src="${a.img || 'https://via.placeholder.com/50?text=Img'}" onerror="this.src='https://via.placeholder.com/50?text=Album'">
+                        <img src="${a.img || 'https://via.placeholder.com/50?text=Album'}" onerror="this.src='https://via.placeholder.com/50?text=Album'">
                         <div style="flex:1">
-                            <strong style="font-size:14px">${a.nombre}</strong><br>
-                            <small style="color:#ff5252; font-size:11px">Falta el ${porcFaltante}% (${a.total - totalTengo} u.)</small>
+                            <strong style="font-size:15px">${a.nombre}</strong><br>
+                            <small style="color:var(--red); font-size:11px">Falta el ${porcFaltante}% (${a.total - totalTengo} u.)</small>
                             <div class="prog-container"><div class="prog-fill" style="width:${porcLleno}%"></div></div>
                         </div>
                     </div>`;
@@ -130,11 +114,11 @@
         function renderNuevoForm() {
             document.getElementById('main-app').innerHTML = `
                 <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
-                <div style="background:#252525; padding:15px; border-radius:10px; border:1px solid var(--primary)">
-                    <h4>Nueva Colección</h4>
-                    <input type="text" id="custom-nombre" placeholder="Nombre (ej: Dragon Ball Z)" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box">
-                    <input type="number" id="custom-total" placeholder="Cantidad total" style="width:100%; padding:10px; margin-bottom:10px; background:#111; border:1px solid #444; color:white; border-radius:5px; box-sizing:border-box">
-                    <button class="btn-accion" onclick="guardarPersonalizada()">CREAR</button>
+                <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #333">
+                    <h4 style="margin-top:0">Nueva Colección</h4>
+                    <input type="text" id="custom-nombre" placeholder="Nombre del Álbum" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #444; color:white; border-radius:8px; box-sizing:border-box">
+                    <input type="number" id="custom-total" placeholder="Cantidad Total" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #444; color:white; border-radius:8px; box-sizing:border-box">
+                    <button class="btn-accion" style="background:var(--accent)" onclick="guardarPersonalizada()">CREAR COLECCIÓN</button>
                 </div>`;
         }
 
@@ -143,18 +127,18 @@
             const total = parseInt(document.getElementById('custom-total').value);
             if(!nombre || !total) return;
             db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, img: "", tengo: [] });
-            localStorage.setItem('colecciones_v8', JSON.stringify(db));
+            localStorage.setItem('colecciones_v9', JSON.stringify(db));
             renderMenu();
         }
 
         function verAlbum(id) {
             const a = db.find(x => x.id === id);
             let html = `
-                <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10; border-bottom:1px solid #333">
+                <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10; border-bottom:1px solid #222">
                     <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
                     <h3 style="margin:0">${a.nombre}</h3>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px">
-                         <small style="color:#ff5252">Faltan: ${a.total - a.tengo.length}</small>
+                    <div style="display:flex; justify-content:space-between; margin-top:5px">
+                         <small style="color:var(--red)">Faltan: ${a.total - a.tengo.length}</small>
                          <small style="color:var(--accent)">Tengo: ${a.tengo.length}</small>
                     </div>
                     <button class="btn-share" onclick="compartirFaltantes('${a.id}')">📲 COMPARTIR FALTANTES</button>
@@ -181,8 +165,8 @@
                 a.tengo.push(nro);
                 el.classList.add('tengo');
             }
-            localStorage.setItem('colecciones_v8', JSON.stringify(db));
-            const txtFaltan = document.querySelector('small[style*="#ff5252"]');
+            localStorage.setItem('colecciones_v9', JSON.stringify(db));
+            const txtFaltan = document.querySelector('small[style*="var(--red)"]');
             const txtTengo = document.querySelector('small[style*="var(--accent)"]');
             if(txtFaltan) txtFaltan.innerText = `Faltan: ${a.total - a.tengo.length}`;
             if(txtTengo) txtTengo.innerText = `Tengo: ${a.tengo.length}`;
@@ -192,7 +176,6 @@
             const a = db.find(x => x.id === id);
             const faltan = [];
             for(let i=1; i<=a.total; i++) { if(!a.tengo.includes(i)) faltan.push(i); }
-            if(faltan.length === 0) return alert("¡Completado!");
             const texto = `¡Hola! Me faltan estas de *${a.nombre}*:\n\n` + faltan.join(", ");
             window.open("https://wa.me/?text=" + encodeURIComponent(texto), '_blank');
         }
