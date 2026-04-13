@@ -8,16 +8,22 @@
         :root { --primary: #ffffff; --bg: #000000; --card: #1a1a1a; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; --red: #ff5252; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         
-        /* PANTALLA DE INICIO */
+        /* PANTALLA DE INICIO Y LOGIN */
         #splash { 
             position: fixed; inset: 0; background: #000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
             z-index: 99999; transition: opacity 0.8s;
         }
         .logo-img { 
-            width: 85%; max-width: 320px; 
+            width: 80%; max-width: 300px; 
             border-radius: 50%; border: 2px solid #333;
             box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        #login-screen {
+            position: fixed; inset: 0; background: #000;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 99998; padding: 20px; text-align: center;
         }
 
         #main-app { display: none; max-width: 500px; margin: auto; }
@@ -37,7 +43,11 @@
         }
         .nro.tengo { background: var(--accent) !important; color: white !important; border-color: #fff !important; }
 
-        .btn-accion { background: #333; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; border: 1px solid #444; }
+        /* INPUTS Y BOTONES */
+        input[type="text"], input[type="number"] {
+            width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-size: 16px; margin-bottom: 15px;
+        }
+        .btn-accion { background: #333; color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid #444; }
         .btn-share { background: var(--whatsapp); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
         .btn-back { background: #222; color: #aaa; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; font-size: 12px; }
     </style>
@@ -45,42 +55,79 @@
 <body>
 
     <div id="splash">
-        <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" 
-             class="logo-img" 
-             onerror="this.src='https://via.placeholder.com/320x320?text=%E2%9A%BD+L.T.A.'">
+        <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" class="logo-img" onerror="this.src='https://via.placeholder.com/300?text=L.T.A.'">
         <p style="margin-top:30px; color:#555; letter-spacing: 2px; font-size: 12px; font-weight: bold;">LA TABERNA DE LOS ÁLBUMES</p>
+    </div>
+
+    <div id="login-screen">
+        <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" style="width:100px; border-radius:50%; margin-bottom:20px;">
+        <h2>¿Cómo te llamás, coleccionista?</h2>
+        <input type="text" id="user-name-input" placeholder="Tu nombre aquí...">
+        <button class="btn-accion" style="background:var(--accent); border:none;" onclick="saveUser()">EMPEZAR A JUNTAR</button>
     </div>
 
     <div id="main-app"></div>
 
     <script>
-        // Cambiamos el nombre de la DB para forzar el refresco de los cambios visuales
-        const DB_NAME = 'colecciones_v10';
+        const DB_NAME = 'lta_colecciones_v11';
         const LOGO_URL = "https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png";
 
         let db = JSON.parse(localStorage.getItem(DB_NAME)) || [];
+        let userName = localStorage.getItem('lta_user_name') || "";
         let tipoActual = "";
 
         window.onload = () => {
+            // Mostramos el logo 2 segundos
             setTimeout(() => {
                 document.getElementById('splash').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('splash').style.display = 'none';
-                    document.getElementById('main-app').style.display = 'block';
-                    renderInicio();
+                    checkUser();
                 }, 800);
-            }, 2500);
+            }, 2000);
         };
+
+        function checkUser() {
+            if (userName === "") {
+                document.getElementById('login-screen').style.display = 'flex';
+            } else {
+                showApp();
+            }
+        }
+
+        function saveUser() {
+            const input = document.getElementById('user-name-input').value.trim();
+            if (input === "") return alert("Por favor, poné tu nombre");
+            localStorage.setItem('lta_user_name', input);
+            userName = input;
+            document.getElementById('login-screen').style.display = 'none';
+            showApp();
+        }
+
+        function showApp() {
+            document.getElementById('main-app').style.display = 'block';
+            renderInicio();
+        }
 
         function renderInicio() {
             document.getElementById('main-app').innerHTML = `
                 <div style="text-align:center; margin: 30px 0;">
-                    <img src="${LOGO_URL}" style="width:80px; border-radius:50%; border: 1px solid #333;" onerror="this.style.display='none'">
-                    <h2 style="margin-top:10px">¡Hola, Martín!</h2>
+                    <img src="${LOGO_URL}" style="width:70px; border-radius:50%; border: 1px solid #333;">
+                    <h2 style="margin-top:10px">¡Hola, ${userName}!</h2>
+                    <p style="color:#666; font-size:12px; margin-top:-5px">¿Qué vamos a completar hoy?</p>
                 </div>
                 <div class="btn-tipo" onclick="setTipo('Carta')">🃏 MIS CARTAS</div>
                 <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ MIS FIGURITAS</div>
+                <p style="text-align:center; color:#333; font-size:10px; margin-top:50px;" onclick="resetUser()">Cambiar nombre de usuario</p>
             `;
+        }
+
+        // Función por si quieren cambiar el nombre después
+        function resetUser() {
+            if(confirm("¿Querés cambiar tu nombre?")) {
+                localStorage.removeItem('lta_user_name');
+                location.reload();
+            }
         }
 
         function setTipo(t) { tipoActual = t; renderMenu(); }
@@ -98,7 +145,7 @@
 
                 html += `
                     <div class="album-card" onclick="verAlbum('${a.id}')">
-                        <img src="${a.img || 'https://via.placeholder.com/55?text=Img'}" onerror="this.src='https://via.placeholder.com/55?text=Album'">
+                        <img src="${a.img || 'https://via.placeholder.com/55?text=Album'}" onerror="this.src='https://via.placeholder.com/55?text=Album'">
                         <div style="flex:1">
                             <strong style="font-size:15px">${a.nombre}</strong><br>
                             <small style="color:var(--red); font-size:11px">Falta el ${porcFaltante}% (${a.total - totalTengo} u.)</small>
@@ -114,9 +161,9 @@
                 <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
                 <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #333">
                     <h4 style="margin-top:0">Nueva Colección</h4>
-                    <input type="text" id="custom-nombre" placeholder="Nombre" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #444; color:white; border-radius:8px; box-sizing:border-box">
-                    <input type="number" id="custom-total" placeholder="Cantidad" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #444; color:white; border-radius:8px; box-sizing:border-box">
-                    <button class="btn-accion" style="background:var(--accent)" onclick="guardarPersonalizada()">CREAR</button>
+                    <input type="text" id="custom-nombre" placeholder="Nombre (ej: Qatar 2022)">
+                    <input type="number" id="custom-total" placeholder="Cantidad Total">
+                    <button class="btn-accion" style="background:var(--accent); border:none;" onclick="guardarPersonalizada()">CREAR</button>
                 </div>`;
         }
 
