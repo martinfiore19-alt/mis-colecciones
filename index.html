@@ -9,7 +9,7 @@
             --bg: #000000; --card: #161616; --text: #ffffff; 
             --accent: #2196F3; --whatsapp: #25d366; --gold: #FFD700; 
         }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; overflow-x: hidden; }
         
         /* SPLASH NEON GIGANTE */
         #splash { position: fixed; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; transition: opacity 0.5s; }
@@ -19,10 +19,10 @@
         .splash-title { color: white; font-weight: bold; letter-spacing: 4px; text-transform: uppercase; font-size: 18px; text-shadow: 0 0 15px var(--accent); }
         @keyframes girar { 100% { transform: rotate(360deg); } }
 
-        /* INTERFAZ PRINCIPAL */
+        /* INTERFAZ */
         #main-app { display: none; max-width: 500px; margin: auto; }
-        .header-user { text-align: center; padding: 30px 10px; border-bottom: 1px solid #222; margin-bottom: 20px; width: 100%; box-sizing: border-box; }
-        .header-user h2 { margin: 10px 0 0 0; font-size: 22px; width: 100%; }
+        .header-user { text-align: center; padding: 25px 0; border-bottom: 1px solid #222; margin-bottom: 20px; }
+        .header-user h2 { margin: 15px 0 0 0; font-size: 22px; }
 
         .btn-tipo { background: var(--card); padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
         .album-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #222; position: relative; }
@@ -36,7 +36,7 @@
         .nro.repe { background: var(--gold); color: black; border-color: #fff; }
 
         input, select { width: 100%; padding: 15px; background: #111; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; margin-bottom: 10px; font-size: 16px; outline: none; }
-        .btn-accion { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-accion { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-back { background: #222; color: #fff; border: none; padding: 10px 15px; border-radius: 6px; margin-bottom: 15px; cursor: pointer; }
         
         #login-screen { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 99998; padding: 30px; }
@@ -54,9 +54,9 @@
 
     <div id="login-screen">
         <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" style="width:100px; border-radius:50%; margin-bottom:20px;">
-        <h3>TU NOMBRE</h3>
+        <h3>¿CÓMO TE LLAMÁS?</h3>
         <input type="text" id="user-input-name" style="text-transform: uppercase;">
-        <button class="btn-accion" onclick="saveUserName()">INGRESAR</button>
+        <button class="btn-accion" onclick="saveUserName()">CONTINUAR</button>
     </div>
 
     <div id="main-app"></div>
@@ -65,13 +65,21 @@
         const DB_NAME = 'lta_glow_v1';
         const LOGO_URL = "https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png";
         
-        // DATOS PREDETERMINADOS
-        const CATALOGO_CARTAS = [{n:"COPA MUNDIAL 2026", t:630},{n:"FIFA 365 2026", t:450},{n:"FUTBOL ARGENTINO 2024", t:538}].sort((a,b)=>a.n.localeCompare(b.n));
-        const CATALOGO_FIGUS = [{n:"FIFA 365 2026", t:660},{n:"COPA MUNDIAL QATAR 2022", t:842},{n:"CONMEBOL COPA AMÉRICA 2024", t:494}].sort((a,b)=>a.n.localeCompare(b.n));
+        // CATÁLOGOS COMPLETOS RECUPERADOS
+        const RAW_CARTAS = [{n:"COPA MUNDIAL 2026", t:630},{n:"FIFA 365 2026", t:450},{n:"MUNDIAL DE CLUBES 2025", t:387},{n:"FIFA 365 2025", t:441},{n:"FUTBOL ARGENTINO 2024", t:538},{n:"FIFA 365 2024", t:441},{n:"COPA MUNDIAL FEMENINA 2023", t:375},{n:"FUTBOL ARGENTINO 2023", t:536},{n:"FIFA 365 2023", t:441},{n:"CLASE TOP 2022", t:438},{n:"QATAR 2022", t:495},{n:"ROAD TO QATAR 2022", t:494},{n:"FUTBOL ARGENTINO 2021", t:501},{n:"FIFA 365 2021", t:398},{n:"EURO 2020", t:709},{n:"FUTBOL ARGENTINO 2020", t:173},{n:"FIFA 365 2020", t:550},{n:"FIFA 365 2019", t:396},{n:"RUSIA 2018", t:622},{n:"FIFA 365 2018", t:573},{n:"FUTBOL ARGENTINO 2017", t:307},{n:"FIFA 365 2017", t:703},{n:"COPA AMERICA 2016", t:315},{n:"BRASIL 2014", t:678},{n:"LIBERTADORES/SUDAMERICANA 2024", t:383}];
+        const RAW_FIGUS = [{n:"LIGA CAMPEONES 2026", t:574},{n:"FIFA 365 2026", t:660},{n:"EURO 2024", t:1428},{n:"MUNDIAL DE CLUBES 2025", t:558},{n:"EURO 2016", t:680},{n:"FUTBOL ARGENTINO 2025", t:567},{n:"FUTBOL ARGENTINO 2024", t:508},{n:"FUTBOL ARGENTINO 2023", t:522},{n:"FUTBOL ARGENTINO 2022", t:519},{n:"FUTBOL ARGENTINO 2021", t:481},{n:"FUTBOL ARGENTINO 2019", t:452},{n:"FUTBOL ARGENTINO 2018", t:392},{n:"FUTBOL ARGENTINO 2016", t:660},{n:"FUTBOL ARGENTINO 2014", t:490},{n:"QATAR 2022", t:842},{n:"RUSIA 2018", t:844},{n:"BRASIL 2014", t:782},{n:"SUDAFRICA 2010", t:806},{n:"ALEMANIA 2006", t:605},{n:"COREA JAPON 2002", t:581},{n:"FRANCIA 1998", t:561},{n:"USA 1994", t:444},{n:"ITALIA 1990", t:448},{n:"MEXICO 1986", t:427},{n:"ESPAÑA 1982", t:427},{n:"ARGENTINA 1978", t:400},{n:"COPA AMERICA 2024", t:494},{n:"COPA AMERICA 2021", t:369}];
 
         let db = JSON.parse(localStorage.getItem(DB_NAME)) || [];
         let userName = localStorage.getItem('lta_user_name_v2') || "";
+        let vistaActual = "inicio";
         let tipoActual = "";
+
+        // NAVEGACIÓN
+        window.onpopstate = () => {
+            if (vistaActual === "album" || vistaActual === "form") renderMenu();
+            else if (vistaActual === "menu") renderInicio();
+        };
+        function pushNav(state) { vistaActual = state; history.pushState({view: state}, ""); }
 
         window.onload = () => {
             setTimeout(() => {
@@ -96,6 +104,7 @@
         function showApp() { document.getElementById('main-app').style.display = 'block'; renderInicio(); }
 
         function renderInicio() {
+            vistaActual = "inicio";
             document.getElementById('main-app').innerHTML = `
                 <div class="header-user">
                     <img src="${LOGO_URL}" style="width:80px; border-radius:50%; border:2px solid var(--accent);">
@@ -105,13 +114,14 @@
                 <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ FIGURITAS</div>`;
         }
 
-        function setTipo(t) { tipoActual = t; renderMenu(); }
+        function setTipo(t) { tipoActual = t; pushNav("menu"); renderMenu(); }
 
         function renderMenu() {
+            vistaActual = "menu";
             const filtrados = db.filter(a => a.tipo === tipoActual);
-            let html = `<button class="btn-back" onclick="renderInicio()">⬅ VOLVER</button>
-                        <h3>MIS ${tipoActual.toUpperCase()}S</h3>
-                        <button class="btn-accion" onclick="renderNuevoForm()">+ AGREGAR COLECCIÓN</button><br><br>`;
+            let html = `<button class="btn-back" onclick="history.back()">⬅ VOLVER</button>
+                        <h3 style="margin-bottom:15px">MIS ${tipoActual.toUpperCase()}S</h3>
+                        <button class="btn-accion" onclick="renderNuevoForm()">+ AGREGAR ÁLBUM</button><br><br>`;
             filtrados.forEach(a => {
                 const porc = Math.floor((a.tengo.length / a.total) * 100);
                 html += `
@@ -121,54 +131,58 @@
                             <small>${porc}% - ${a.tengo.length}/${a.total}</small>
                             <div class="prog-container"><div class="prog-fill" style="width:${porc}%"></div></div>
                         </div>
-                        <div onclick="eliminarAlbum(event, '${a.id}')">✖</div>
+                        <div onclick="eliminarAlbum(event, '${a.id}')" style="padding:10px; color:#666;">✖</div>
                     </div>`;
             });
             document.getElementById('main-app').innerHTML = html;
         }
 
         function renderNuevoForm() {
+            pushNav("form");
+            const cat = (tipoActual === 'Carta' ? RAW_CARTAS : RAW_FIGUS).sort((a,b)=>a.n.localeCompare(b.n));
             document.getElementById('main-app').innerHTML = `
-                <button class="btn-back" onclick="renderMenu()">⬅ CANCELAR</button>
-                <div style="background:#111; padding:20px; border-radius:15px;">
-                    <label>ELEGIR PREDETERMINADA:</label>
-                    <select id="sel-cat" onchange="checkManual(this.value)">
+                <button class="btn-back" onclick="history.back()">⬅ CANCELAR</button>
+                <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #333">
+                    <label>LISTA DE COLECCIONES:</label>
+                    <select id="sel-cat" onchange="toggleManual(this.value)">
                         <option value="">-- SELECCIONÁ --</option>
-                        <option value="MANUAL">✨ CREAR NUEVA (MANUAL)</option>
-                        ${(tipoActual === 'Carta' ? CATALOGO_CARTAS : CATALOGO_FIGUS).map((x, i) => `<option value="${i}">${x.n}</option>`).join('')}
+                        <option value="MANUAL">✨ CREAR PERSONALIZADO</option>
+                        ${cat.map((x, i) => `<option value="${i}">${x.n} (${x.t})</option>`).join('')}
                     </select>
                     <div id="form-manual" style="display:none; margin-top:15px;">
                         <input type="text" id="m-nombre" placeholder="NOMBRE DEL ÁLBUM">
                         <input type="number" id="m-total" placeholder="CANTIDAD TOTAL">
                     </div>
-                    <button class="btn-accion" style="margin-top:20px;" onclick="guardar()">AGREGAR</button>
+                    <button class="btn-accion" style="margin-top:20px;" onclick="guardar()">AGREGAR A LA TABERNA</button>
                 </div>`;
         }
 
-        function checkManual(v) { document.getElementById('form-manual').style.display = (v === 'MANUAL') ? 'block' : 'none'; }
+        function toggleManual(v) { document.getElementById('form-manual').style.display = (v === 'MANUAL') ? 'block' : 'none'; }
 
         function guardar() {
             const sel = document.getElementById('sel-cat').value;
             let n, t;
+            const cat = (tipoActual === 'Carta' ? RAW_CARTAS : RAW_FIGUS).sort((a,b)=>a.n.localeCompare(b.n));
+            
             if (sel === 'MANUAL') {
                 n = document.getElementById('m-nombre').value.toUpperCase();
                 t = parseInt(document.getElementById('m-total').value);
             } else if (sel !== "") {
-                const item = (tipoActual === 'Carta' ? CATALOGO_CARTAS : CATALOGO_FIGUS)[sel];
-                n = item.n; t = item.t;
+                n = cat[sel].n; t = cat[sel].t;
             } else return;
 
             if (n && t > 0) {
                 db.push({ id: 'a'+Date.now(), nombre: n, total: t, tipo: tipoActual, tengo: [], repes: [] });
                 localStorage.setItem(DB_NAME, JSON.stringify(db));
-                renderMenu();
+                history.back();
             }
         }
 
         function verAlbum(id) {
+            pushNav("album");
             const a = db.find(x => x.id === id);
-            let html = `<button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
-                        <h3 style="margin-bottom:20px;">${a.nombre}</h3>
+            let html = `<button class="btn-back" onclick="history.back()">⬅ VOLVER</button>
+                        <h3 style="margin-bottom:15px; border-left:4px solid var(--accent); padding-left:10px;">${a.nombre}</h3>
                         <div class="grid">`;
             for(let i=1; i<=a.total; i++) {
                 let cl = a.repes.includes(i) ? "tengo repe" : (a.tengo.includes(i) ? "tengo" : "");
@@ -186,7 +200,7 @@
             localStorage.setItem(DB_NAME, JSON.stringify(db));
         }
 
-        function eliminarAlbum(e, id) { e.stopPropagation(); if(confirm("¿ELIMINAR?")) { db = db.filter(x => x.id !== id); localStorage.setItem(DB_NAME, JSON.stringify(db)); renderMenu(); } }
+        function eliminarAlbum(e, id) { e.stopPropagation(); if(confirm("¿ELIMINAR ESTE ÁLBUM?")) { db = db.filter(x => x.id !== id); localStorage.setItem(DB_NAME, JSON.stringify(db)); renderMenu(); } }
     </script>
 </body>
 </html>
