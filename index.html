@@ -16,24 +16,25 @@
         .album-card { background: var(--card); padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; cursor: pointer; }
         .album-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #222; }
         
-        /* Barra de Progreso en el Menú */
         .prog-container { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 5px; overflow: hidden; }
         .prog-fill { height: 100%; background: var(--primary); transition: width 0.5s; }
 
-        /* GRILLA MINIATURA (7 columnas) */
+        /* GRILLA FIJA - ENTRAN 7 POR FILA */
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 15px; }
         .nro { 
             background: #1e1e1e; 
-            padding: 8px 0; 
+            padding: 10px 0; 
             text-align: center; 
             border-radius: 4px; 
             color: #ff5252; 
             border: 1px solid #333; 
             font-weight: bold; 
-            font-size: 12px; /* Texto más chico */
+            font-size: 11px; 
             cursor: pointer; 
+            transition: all 0.2s;
         }
-        .nro.tengo { background: var(--accent); color: white; border-color: #fff; }
+        /* CUANDO LA TENGO, SOLO CAMBIA COLOR, NO SE MUEVE */
+        .nro.tengo { background: var(--accent) !important; color: white !important; border-color: #fff !important; }
 
         .btn-accion { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .btn-share { background: var(--whatsapp); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
@@ -44,7 +45,7 @@
 
     <div id="splash">
         <h1 style="color:var(--primary)">MI COLECCIÓN</h1>
-        <p>Optimizando vista...</p>
+        <p>Cargando grilla fija...</p>
     </div>
 
     <div id="main-app"></div>
@@ -55,7 +56,7 @@
             { id: "ca24", nombre: "Copa América 2024", total: 430, tipo: "Figurita", img: "https://exitocol.vtexassets.com/arquivos/ids/22373752/Album-Copa-America-2024-Panini.jpg" }
         ];
 
-        let db = JSON.parse(localStorage.getItem('colecciones_v6')) || [];
+        let db = JSON.parse(localStorage.getItem('colecciones_v7')) || [];
         let tipoActual = "";
 
         window.onload = () => {
@@ -84,15 +85,15 @@
             
             filtrados.forEach(a => {
                 const totalTengo = a.tengo.length;
-                const porcLleno = Math.floor((totalTengo / a.total) * 100);
-                const porcFaltante = 100 - porcLleno;
+                const porcFaltante = Math.floor(((a.total - totalTengo) / a.total) * 100);
+                const porcLleno = 100 - porcFaltante;
 
                 html += `
                     <div class="album-card" onclick="verAlbum('${a.id}')">
-                        <img src="${a.img || 'https://via.placeholder.com/50?text=Img'}">
+                        <img src="${a.img || 'https://via.placeholder.com/50?text=Img'}" onerror="this.src='https://via.placeholder.com/50?text=Album'">
                         <div style="flex:1">
                             <strong style="font-size:14px">${a.nombre}</strong><br>
-                            <small style="color:#aaa; font-size:11px">Falta el ${porcFaltante}% (${a.total - totalTengo} u.)</small>
+                            <small style="color:#ff5252; font-size:11px">Falta el ${porcFaltante}% (${a.total - totalTengo} u.)</small>
                             <div class="prog-container"><div class="prog-fill" style="width:${porcLleno}%"></div></div>
                         </div>
                     </div>`;
@@ -116,7 +117,7 @@
             const total = parseInt(document.getElementById('custom-total').value);
             if(!nombre || !total) return;
             db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, img: "", tengo: [] });
-            localStorage.setItem('colecciones_v6', JSON.stringify(db));
+            localStorage.setItem('colecciones_v7', JSON.stringify(db));
             renderMenu();
         }
 
@@ -136,20 +137,37 @@
                 <div class="grid">`;
             for(let i=1; i<=a.total; i++) {
                 const clase = a.tengo.includes(i) ? 'tengo' : '';
-                html += `<div class="nro ${clase}" onclick="toggle('${id}', ${i})">${i}</div>`;
+                html += `<div class="nro ${clase}" id="card-${i}" onclick="toggle('${id}', ${i})">${i}</div>`;
             }
             html += `</div>`;
             document.getElementById('main-app').innerHTML = html;
             window.scrollTo(0,0);
         }
 
-        function toggle(id, n) {
-            const a = db.find(x => x.id === id);
-            const idx = a.tengo.indexOf(n);
-            if(idx > -1) a.tengo.splice(idx, 1);
-            else a.tengo.push(n);
-            localStorage.setItem('colecciones_v6', JSON.stringify(db));
-            verAlbum(id);
+        // LA FUNCIÓN TOGGLE AHORA SOLO CAMBIA LA CLASE CSS, NO BORRA NADA
+        function toggle(albumId, nro) {
+            const a = db.find(x => x.id === albumId);
+            const idx = a.tengo.indexOf(nro);
+            const el = document.getElementById(`card-${nro}`);
+
+            if(idx > -1) {
+                // Si ya estaba, la quito de la lista y saco el color verde
+                a.tengo.splice(idx, 1);
+                el.classList.remove('tengo');
+            } else {
+                // Si no estaba, la agrego y pongo color verde
+                a.tengo.push(nro);
+                el.classList.add('tengo');
+            }
+            
+            // Guardo en memoria
+            localStorage.setItem('colecciones_v7', JSON.stringify(db));
+            
+            // Actualizo los numeritos de arriba sin refrescar toda la pantalla
+            const txtFaltan = document.querySelector('small[style*="#ff5252"]');
+            const txtTengo = document.querySelector('small[style*="var(--accent)"]');
+            if(txtFaltan) txtFaltan.innerText = `Faltan: ${a.total - a.tengo.length}`;
+            if(txtTengo) txtTengo.innerText = `Tengo: ${a.tengo.length}`;
         }
 
         function compartirFaltantes(id) {
