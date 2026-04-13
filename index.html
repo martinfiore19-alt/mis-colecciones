@@ -8,7 +8,7 @@
         :root { --primary: #ffffff; --bg: #000000; --card: #1a1a1a; --text: #ffffff; --accent: #2e7d32; --whatsapp: #25d366; --red: #ff5252; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         
-        /* PANTALLA DE INICIO (LOGO MARADONA) */
+        /* PANTALLA DE INICIO */
         #splash { 
             position: fixed; inset: 0; background: #000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
@@ -22,12 +22,10 @@
 
         #main-app { display: none; max-width: 500px; margin: auto; }
         
-        /* DISEÑO DE TARJETAS */
         .btn-tipo { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
         .album-card { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; cursor: pointer; }
         .album-card img { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; background: #222; }
         
-        /* BARRAS Y GRILLA */
         .prog-container { width: 100%; height: 5px; background: #333; border-radius: 3px; margin-top: 6px; overflow: hidden; }
         .prog-fill { height: 100%; background: var(--accent); transition: width 0.5s; }
 
@@ -39,7 +37,6 @@
         }
         .nro.tengo { background: var(--accent) !important; color: white !important; border-color: #fff !important; }
 
-        /* BOTONES */
         .btn-accion { background: #333; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; border: 1px solid #444; }
         .btn-share { background: var(--whatsapp); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
         .btn-back { background: #222; color: #aaa; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; font-size: 12px; }
@@ -48,19 +45,20 @@
 <body>
 
     <div id="splash">
-        <img src="https://github.com/martinfiore19-alt/mis-colecciones/blob/main/logo.png?raw=true" class="logo-img">
-        <p style="margin-top:30px; color:#555; letter-spacing: 2px; font-size: 12px;">LA TABERNA DE LOS ÁLBUMES</p>
+        <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" 
+             class="logo-img" 
+             onerror="this.src='https://via.placeholder.com/320x320?text=%E2%9A%BD+L.T.A.'">
+        <p style="margin-top:30px; color:#555; letter-spacing: 2px; font-size: 12px; font-weight: bold;">LA TABERNA DE LOS ÁLBUMES</p>
     </div>
 
     <div id="main-app"></div>
 
     <script>
-        const CATALOGO = [
-            { id: "f26", nombre: "FIFA 365 2026", total: 630, tipo: "Carta", img: "https://m.media-amazon.com/images/I/71C7x6y-G9L._AC_SL1500_.jpg" },
-            { id: "ca24", nombre: "Copa América 2024", total: 430, tipo: "Figurita", img: "https://exitocol.vtexassets.com/arquivos/ids/22373752/Album-Copa-America-2024-Panini.jpg" }
-        ];
+        // Cambiamos el nombre de la DB para forzar el refresco de los cambios visuales
+        const DB_NAME = 'colecciones_v10';
+        const LOGO_URL = "https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png";
 
-        let db = JSON.parse(localStorage.getItem('colecciones_v9')) || [];
+        let db = JSON.parse(localStorage.getItem(DB_NAME)) || [];
         let tipoActual = "";
 
         window.onload = () => {
@@ -77,8 +75,8 @@
         function renderInicio() {
             document.getElementById('main-app').innerHTML = `
                 <div style="text-align:center; margin: 30px 0;">
-                    <img src="https://github.com/martinfiore19-alt/mis-colecciones/blob/main/logo.png?raw=true" style="width:80px; border-radius:50%">
-                    <h2 style="margin-top:10px">¡Bienvenido, Martín!</h2>
+                    <img src="${LOGO_URL}" style="width:80px; border-radius:50%; border: 1px solid #333;" onerror="this.style.display='none'">
+                    <h2 style="margin-top:10px">¡Hola, Martín!</h2>
                 </div>
                 <div class="btn-tipo" onclick="setTipo('Carta')">🃏 MIS CARTAS</div>
                 <div class="btn-tipo" onclick="setTipo('Figurita')">⚽ MIS FIGURITAS</div>
@@ -100,7 +98,7 @@
 
                 html += `
                     <div class="album-card" onclick="verAlbum('${a.id}')">
-                        <img src="${a.img || 'https://via.placeholder.com/50?text=Album'}" onerror="this.src='https://via.placeholder.com/50?text=Album'">
+                        <img src="${a.img || 'https://via.placeholder.com/55?text=Img'}" onerror="this.src='https://via.placeholder.com/55?text=Album'">
                         <div style="flex:1">
                             <strong style="font-size:15px">${a.nombre}</strong><br>
                             <small style="color:var(--red); font-size:11px">Falta el ${porcFaltante}% (${a.total - totalTengo} u.)</small>
@@ -116,9 +114,9 @@
                 <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
                 <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #333">
                     <h4 style="margin-top:0">Nueva Colección</h4>
-                    <input type="text" id="custom-nombre" placeholder="Nombre del Álbum" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #444; color:white; border-radius:8px; box-sizing:border-box">
-                    <input type="number" id="custom-total" placeholder="Cantidad Total" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #444; color:white; border-radius:8px; box-sizing:border-box">
-                    <button class="btn-accion" style="background:var(--accent)" onclick="guardarPersonalizada()">CREAR COLECCIÓN</button>
+                    <input type="text" id="custom-nombre" placeholder="Nombre" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #444; color:white; border-radius:8px; box-sizing:border-box">
+                    <input type="number" id="custom-total" placeholder="Cantidad" style="width:100%; padding:12px; margin-bottom:10px; background:#000; border:1px solid #444; color:white; border-radius:8px; box-sizing:border-box">
+                    <button class="btn-accion" style="background:var(--accent)" onclick="guardarPersonalizada()">CREAR</button>
                 </div>`;
         }
 
@@ -127,7 +125,7 @@
             const total = parseInt(document.getElementById('custom-total').value);
             if(!nombre || !total) return;
             db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, img: "", tengo: [] });
-            localStorage.setItem('colecciones_v9', JSON.stringify(db));
+            localStorage.setItem(DB_NAME, JSON.stringify(db));
             renderMenu();
         }
 
@@ -137,7 +135,7 @@
                 <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10; border-bottom:1px solid #222">
                     <button class="btn-back" onclick="renderMenu()">⬅ Volver</button>
                     <h3 style="margin:0">${a.nombre}</h3>
-                    <div style="display:flex; justify-content:space-between; margin-top:5px">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px">
                          <small style="color:var(--red)">Faltan: ${a.total - a.tengo.length}</small>
                          <small style="color:var(--accent)">Tengo: ${a.tengo.length}</small>
                     </div>
@@ -165,7 +163,7 @@
                 a.tengo.push(nro);
                 el.classList.add('tengo');
             }
-            localStorage.setItem('colecciones_v9', JSON.stringify(db));
+            localStorage.setItem(DB_NAME, JSON.stringify(db));
             const txtFaltan = document.querySelector('small[style*="var(--red)"]');
             const txtTengo = document.querySelector('small[style*="var(--accent)"]');
             if(txtFaltan) txtFaltan.innerText = `Faltan: ${a.total - a.tengo.length}`;
