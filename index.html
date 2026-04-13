@@ -16,7 +16,10 @@
         #main-app { display: none; max-width: 500px; margin: auto; }
         
         .btn-tipo { background: var(--card); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 15px; font-size: 18px; font-weight: bold; cursor: pointer; border: 1px solid #333; }
-        .album-card { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; cursor: pointer; }
+        
+        /* ESTILO DE LA TARJETA CON FOTO */
+        .album-card { background: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; cursor: pointer; overflow: hidden; }
+        .album-card img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #444; background: #222; }
         
         .prog-container { width: 100%; height: 5px; background: #333; border-radius: 3px; margin-top: 6px; overflow: hidden; }
         .prog-fill { height: 100%; background: var(--accent); transition: width 0.5s; }
@@ -25,7 +28,7 @@
         .nro { background: #1a1a1a; padding: 12px 0; text-align: center; border-radius: 4px; color: var(--red); border: 1px solid #333; font-weight: bold; font-size: 11px; cursor: pointer; }
         .nro.tengo { background: var(--accent) !important; color: white !important; border-color: #fff !important; }
 
-        input, select { width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-size: 16px; margin-bottom: 15px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: white; border-radius: 10px; box-sizing: border-box; font-size: 16px; margin-bottom: 15px; }
         .btn-accion { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .btn-share { background: var(--whatsapp); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
         .btn-back { background: #222; color: #aaa; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
@@ -41,15 +44,17 @@
     <div id="login-screen">
         <img src="https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png" style="width:100px; border-radius:50%; margin-bottom:20px;">
         <h2 style="margin-bottom:20px">¿CÓMO TE LLAMÁS?</h2>
-        <input type="text" id="user-name-input" placeholder="ESCRIBÍ TU NOMBRE...">
+        <input type="text" id="user-name-input" style="text-transform: uppercase;" placeholder="ESCRIBÍ TU NOMBRE...">
         <button class="btn-accion" onclick="saveUser()">CONTINUAR</button>
     </div>
 
     <div id="main-app"></div>
 
     <script>
-        const DB_NAME = 'lta_final_v15';
+        const DB_NAME = 'lta_final_v16';
         const LOGO_URL = "https://raw.githubusercontent.com/martinfiore19-alt/mis-colecciones/main/logo.png";
+        const IMG_DEFAULT_CARTAS = "https://via.placeholder.com/150/1a1a1a/ffffff?text=CARTAS";
+        const IMG_DEFAULT_FIGUS = "https://via.placeholder.com/150/1a1a1a/ffffff?text=FIGUS";
 
         const RAW_CATALOGO = [
             { n: "Copa Mundial de la FIFA 2026 Adrenalyn XL", t: 630 },
@@ -142,27 +147,37 @@
 
         function renderMenu() {
             const filtrados = db.filter(a => a.tipo === tipoActual);
-            let btnTexto = tipoActual === 'Carta' ? '+ AGREGAR DESDE CATÁLOGO' : '+ NUEVO ÁLBUM';
-            
             let html = `<button class="btn-back" onclick="renderInicio()">⬅ VOLVER</button>
                         <h3 style="margin-bottom:15px;">SECCIÓN ${tipoActual.toUpperCase()}S</h3>
-                        <button class="btn-accion" style="padding:12px; font-size:14px;" onclick="renderNuevoForm()"> ${btnTexto}</button><br><br>`;
+                        <button class="btn-accion" style="padding:12px; font-size:14px;" onclick="renderNuevoForm()">+ AGREGAR NUEVA</button><br><br>`;
             
             filtrados.forEach(a => {
                 const totalTengo = a.tengo.length;
                 const porcFaltante = Math.floor(((a.total - totalTengo) / a.total) * 100);
                 const porcLleno = 100 - porcFaltante;
+                const foto = a.img || (tipoActual === 'Carta' ? IMG_DEFAULT_CARTAS : IMG_DEFAULT_FIGUS);
+
                 html += `
                     <div class="album-card" onclick="verAlbum('${a.id}')">
-                        <div style="width:55px; height:55px; background:#222; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px">${tipoActual === 'Carta' ? '🃏' : '⚽'}</div>
+                        <img src="${foto}" onerror="this.src='${tipoActual === 'Carta' ? IMG_DEFAULT_CARTAS : IMG_DEFAULT_FIGUS}'">
                         <div style="flex:1">
                             <strong style="font-size:14px">${a.nombre}</strong><br>
                             <small style="color:var(--red); font-size:11px">FALTA EL ${porcFaltante}% (${a.total - totalTengo} U.)</small>
                             <div class="prog-container"><div class="prog-fill" style="width:${porcLleno}%"></div></div>
                         </div>
+                        <div style="font-size:10px; color:#444; margin-right:5px;" onclick="eliminarAlbum(event, '${a.id}')">✖</div>
                     </div>`;
             });
             document.getElementById('main-app').innerHTML = html;
+        }
+
+        function eliminarAlbum(e, id) {
+            e.stopPropagation();
+            if(confirm("¿ELIMINAR ESTA COLECCIÓN?")) {
+                db = db.filter(x => x.id !== id);
+                localStorage.setItem(DB_NAME, JSON.stringify(db));
+                renderMenu();
+            }
         }
 
         function renderNuevoForm() {
@@ -170,22 +185,22 @@
             if (tipoActual === 'Carta') {
                 let options = CATALOGO_CARTAS.map((item, index) => `<option value="${index}">${item.n} (${item.t})</option>`).join('');
                 catalogoHtml = `
-                    <h4 style="margin-top:0">ELEGIR DEL CATÁLOGO ADRENALYN</h4>
+                    <h4 style="margin-top:0">ELEGIR DEL CATÁLOGO</h4>
                     <select id="select-catalogo">${options}</select>
                     <hr style="border:0; border-top:1px solid #333; margin:15px 0">
-                    <p style="font-size:12px; color:#666">O AGREGÁ UNA PERSONALIZADA:</p>
+                    <p style="font-size:12px; color:#666">O PERSONALIZADA:</p>
                 `;
-            } else {
-                catalogoHtml = `<h4 style="margin-top:0">NUEVA COLECCIÓN DE FIGURITAS</h4>`;
             }
             
             document.getElementById('main-app').innerHTML = `
                 <button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
                 <div style="background:#111; padding:20px; border-radius:15px; border:1px solid #333">
                     ${catalogoHtml}
-                    <input type="text" id="custom-nombre" placeholder="NOMBRE">
-                    <input type="number" id="custom-total" placeholder="TOTAL DE ITEMS">
-                    <button class="btn-accion" onclick="guardarColeccion()">AGREGAR A MI LISTA</button>
+                    <input type="text" id="custom-nombre" style="text-transform: uppercase;" placeholder="NOMBRE (EJ: RUSIA 2018)">
+                    <input type="number" id="custom-total" placeholder="CANTIDAD TOTAL">
+                    <input type="text" id="custom-img" placeholder="LINK DE LA FOTO (OPCIONAL)">
+                    <p style="font-size:10px; color:#444;">TIP: BUSCÁ LA FOTO EN GOOGLE Y PEGÁ EL LINK AQUÍ.</p>
+                    <button class="btn-accion" onclick="guardarColeccion()">GUARDAR COLECCIÓN</button>
                 </div>`;
         }
 
@@ -193,16 +208,22 @@
             const select = document.getElementById('select-catalogo');
             const customNombre = document.getElementById('custom-nombre').value.trim().toUpperCase();
             const customTotal = parseInt(document.getElementById('custom-total').value);
+            const customImg = document.getElementById('custom-img').value.trim();
+
             let nombre, total;
+
             if (customNombre !== "" && !isNaN(customTotal)) {
-                nombre = customNombre; total = customTotal;
+                nombre = customNombre;
+                total = customTotal;
             } else if (tipoActual === 'Carta' && select) {
                 const item = CATALOGO_CARTAS[select.value];
-                nombre = item.n; total = item.t;
+                nombre = item.n;
+                total = item.t;
             } else {
-                return alert("COMPLETÁ LOS DATOS");
+                return alert("COMPLETÁ NOMBRE Y CANTIDAD");
             }
-            db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, tengo: [] });
+
+            db.push({ id: "c_" + Date.now(), nombre, total, tipo: tipoActual, img: customImg, tengo: [] });
             localStorage.setItem(DB_NAME, JSON.stringify(db));
             renderMenu();
         }
@@ -212,8 +233,11 @@
             let html = `
                 <div style="position:sticky; top:0; background:var(--bg); padding-bottom:10px; z-index:10; border-bottom:1px solid #222">
                     <button class="btn-back" onclick="renderMenu()">⬅ VOLVER</button>
-                    <h3 style="margin:0; font-size:16px;">${a.nombre}</h3>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${a.img || (tipoActual === 'Carta' ? IMG_DEFAULT_CARTAS : IMG_DEFAULT_FIGUS)}" style="width:40px; height:40px; border-radius:5px; object-fit:cover;">
+                        <h3 style="margin:0; font-size:14px; flex:1;">${a.nombre}</h3>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px">
                          <small style="color:var(--red)">FALTAN: ${a.total - a.tengo.length}</small>
                          <small style="color:var(--accent)">TENGO: ${a.tengo.length}</small>
                     </div>
