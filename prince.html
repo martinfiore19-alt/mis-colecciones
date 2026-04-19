@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prince of Web - Fix</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body { margin: 0; background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: sans-serif; }
+        #msg { position: absolute; top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="msg">Si no se mueve, HAZ CLIC en el cuadro negro</div>
+<script>
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 400,
+    backgroundColor: '#333',
+    physics: {
+        default: 'arcade',
+        arcade: { gravity: { y: 1000 } }
+    },
+    scene: { preload: preload, create: create, update: update }
+};
+
+const game = new Phaser.Game(config);
+let player, cursors, platforms;
+
+function preload() {
+    // Creamos texturas de emergencia de forma más robusta
+    let graphics = this.make.graphics({x: 0, y: 0, add: false});
+    
+    // Personaje (Cubo Blanco)
+    graphics.fillStyle(0xffffff, 1);
+    graphics.fillRect(0, 0, 30, 45);
+    graphics.generateTexture('player', 30, 45);
+    graphics.clear();
+
+    // Suelo (Cubo Marrón)
+    graphics.fillStyle(0x8d6e63, 1);
+    graphics.fillRect(0, 0, 40, 40);
+    graphics.generateTexture('brick', 40, 40);
+    graphics.clear();
+}
+
+function create() {
+    platforms = this.physics.add.staticGroup();
+
+    // Crear un suelo largo
+    for (let i = 0; i < 20; i++) {
+        platforms.create(i * 40 + 20, 380, 'brick');
+    }
+
+    // Plataforma flotante
+    platforms.create(400, 250, 'brick');
+    platforms.create(440, 250, 'brick');
+
+    // JUGADOR: Lo ponemos bien arriba para verlo caer
+    player = this.physics.add.sprite(100, 100, 'player');
+    player.setCollideWorldBounds(true);
+    
+    // Colisión
+    this.physics.add.collider(player, platforms);
+
+    // Controles
+    cursors = this.input.keyboard.createCursorKeys();
+
+    console.log("Juego listo. Usa las flechas.");
+}
+
+function update() {
+    if (!cursors || !player) return;
+
+    if (cursors.left.isDown) {
+        player.setVelocityX(-200);
+    } else if (cursors.right.isDown) {
+        player.setVelocityX(200);
+    } else {
+        player.setVelocityX(0);
+    }
+
+    if (cursors.up.isDown && player.body.touching.down) {
+        player.setVelocityY(-500);
+    }
+}
+</script>
+</body>
+</html>
