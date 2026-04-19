@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prince of Web - Level 1</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body { margin: 0; background: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+    </style>
+</head>
+<body>
+
+<script>
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 400,
+    physics: {
+        default: 'arcade',
+        arcade: { gravity: { y: 1200 }, debug: false }
+    },
+    scene: { preload: preload, create: create, update: update }
+};
+
+const game = new Phaser.Game(config);
+let player, cursors, platforms, spikes, exitDoor;
+
+function preload() {
+    let canvas = document.createElement('canvas');
+    let ctx = canvas.getContext('2d');
+
+    // Personaje
+    ctx.fillStyle = '#fff1e8'; ctx.fillRect(0, 0, 30, 45);
+    this.textures.addCanvas('player', canvas);
+
+    // Ladrillo Mazmorra
+    let wallCanvas = document.createElement('canvas');
+    let wallCtx = wallCanvas.getContext('2d');
+    wallCtx.fillStyle = '#4e342e'; wallCtx.fillRect(0, 0, 40, 40);
+    wallCtx.strokeStyle = '#3e2723'; wallCtx.strokeRect(0, 0, 40, 40);
+    this.textures.addCanvas('brick', wallCanvas);
+
+    // Pinchos
+    let spikeCanvas = document.createElement('canvas');
+    let spikeCtx = spikeCanvas.getContext('2d');
+    spikeCtx.fillStyle = '#b0bec5'; spikeCtx.beginPath();
+    spikeCtx.moveTo(0, 20); spikeCtx.lineTo(10, 0); spikeCtx.lineTo(20, 20); spikeCtx.fill();
+    this.textures.addCanvas('spike', spikeCanvas);
+
+    // Puerta de Salida
+    let doorCanvas = document.createElement('canvas');
+    let doorCtx = doorCanvas.getContext('2d');
+    doorCtx.fillStyle = '#ffd700'; doorCtx.fillRect(0, 0, 40, 60);
+    this.textures.addCanvas('door', doorCanvas);
+}
+
+function create() {
+    // Definir límites del mundo (un nivel largo)
+    this.physics.world.setBounds(0, 0, 2000, 400);
+
+    platforms = this.physics.add.staticGroup();
+    
+    // Generar un nivel lineal
+    for(let i = 0; i < 50; i++) {
+        platforms.create(i * 40, 380, 'brick'); // Suelo
+    }
+
+    // Obstáculos y Plataformas
+    platforms.create(400, 280, 'brick');
+    platforms.create(440, 280, 'brick');
+    
+    platforms.create(700, 200, 'brick');
+    platforms.create(740, 200, 'brick');
+    platforms.create(780, 200, 'brick');
+
+    // Trampas
+    spikes = this.physics.add.staticGroup();
+    spikes.create(600, 355, 'spike');
+    spikes.create(620, 355, 'spike');
+    spikes.create(1200, 355, 'spike');
+
+    // Salida (Al final del nivel)
+    exitDoor = this.physics.add.sprite(1800, 320, 'door');
+    
+    // Jugador
+    player = this.physics.add.sprite(100, 300, 'player');
+    player.setCollideWorldBounds(true);
+
+    // Cámara
+    this.cameras.main.setBounds(0, 0, 2000, 400);
+    this.cameras.main.startFollow(player, true, 0.1, 0.1);
+
+    // Colisiones
+    this.physics.add.collider(player, platforms);
+    this.physics.add.collider(player, spikes, () => die(this), null, this);
+    this.physics.add.overlap(player, exitDoor, () => win(this), null, this);
+
+    cursors = this.input.keyboard.createCursorKeys();
+}
+
+function update() {
+    const speed = 200;
+    
+    if (cursors.left.isDown) {
+        player.setVelocityX(-speed);
+    } else if (cursors.right.isDown) {
+        player.setVelocityX(speed);
+    } else {
+        player.setVelocityX(0);
+    }
+
+    // Salto con inercia (si corres, saltas más lejos)
+    if (cursors.up.isDown && player.body.touching.down) {
+        player.setVelocityY(-500);
+    }
+}
+
+function die(scene) {
+    player.setTint(0xff0000);
+    scene.physics.pause();
+    setTimeout(() => scene.scene.restart(), 1000);
+}
+
+function win(scene) {
+    player.setTint(0x00ff00);
+    let txt = scene.add.text(player.x - 100, 150, '¡NIVEL COMPLETADO!', { 
+        fontSize: '32px', fill: '#fff', backgroundColor: '#000' 
+    });
+    scene.physics.pause();
+}
+</script>
+</body>
+</html>
